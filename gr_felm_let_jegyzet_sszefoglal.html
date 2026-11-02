@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfelmélet Jegyzet Összefoglaló – Dr. Hajnal Péter könyve alapján</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .math-var { font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        .glass-card {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        svg text {
+            user-select: none;
+        }
+        .edge-interactive {
+            cursor: pointer;
+            transition: stroke 0.2s ease, stroke-width 0.2s ease;
+        }
+        .edge-interactive:hover {
+            stroke-width: 6px !important;
+        }
+        .node-circle {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300">
+
+    <!-- Felső navigációs sáv -->
+    <header class="sticky top-0 z-50 bg-white/85 dark:bg-slate-900/85 glass-card border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold shadow-md shadow-brand-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="3" stroke-width="2"/>
+                        <circle cx="18" cy="6" r="3" stroke-width="2"/>
+                        <circle cx="12" cy="18" r="3" stroke-width="2"/>
+                        <line x1="8.5" y1="7.5" x2="15.5" y2="7.5" stroke-width="2"/>
+                        <line x1="7.5" y1="8.5" x2="10.5" y2="15.5" stroke-width="2"/>
+                        <line x1="16.5" y1="8.5" x2="13.5" y2="15.5" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Gráfelmélet Füzetjegyzet</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Hajnal Péter: Gráfelmélet (POLYGON, 2003) alapján</p>
+                </div>
+            </div>
+
+            <!-- Gyorsmenü desktopon -->
+            <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
+                <a href="#egyszeru" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">1. Egyszerű gráf</a>
+                <a href="#reprezentaciok" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">2. Reprezentációk</a>
+                <a href="#kereses" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">3. BFS & DFS</a>
+                <a href="#euler-hamilton" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">4. Hamilton & Euler</a>
+                <a href="#izomorfia" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">5. Izomorfia</a>
+                <a href="#kviz" class="px-3 py-1.5 rounded-lg text-brand-600 dark:text-brand-400 font-semibold hover:bg-brand-50 dark:hover:bg-slate-800 transition">Önellenőrzés</a>
+            </nav>
+
+            <!-- Téma váltó gomb -->
+            <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Sötét/Világos mód váltása">
+                <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero / Füzet áttekintő szekció -->
+    <section class="relative overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-gradient-to-b from-brand-50/60 to-transparent dark:from-brand-900/15">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 text-xs font-semibold">
+                        <span>Kézzel írt füzetjegyzet feldolgozása</span>
+                        <span>•</span>
+                        <span>Oldalszám-hivatkozásokkal</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                        Minden füzetbeli témakör egyetlen interaktív jegyzetben
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
+                        Ez az oldal pontosan a füzetedben felírt 5 kulcstémát dolgozza fel <strong>Dr. Hajnal Péter: Gráfelmélet</strong> című jegyzetéből. A definíciók és tételek mellett interaktív szimulációkon próbálhatod ki a mátrixokat, a keresőalgoritmusokat és a bejárásokat.
+                    </p>
+                </div>
+
+                <!-- Füzet-kártya rekonstrukció -->
+                <div class="lg:col-span-5">
+                    <div class="bg-amber-50/90 dark:bg-slate-900 border-2 border-amber-200 dark:border-slate-700 rounded-2xl p-5 shadow-lg relative">
+                        <div class="flex items-center justify-between border-b border-amber-200 dark:border-slate-800 pb-3 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">Füzetben felírt vázlatpontok</span>
+                            <span class="text-xs px-2 py-0.5 rounded bg-amber-200/70 dark:bg-slate-800 text-amber-900 dark:text-slate-300 font-mono">5 témakör</span>
+                        </div>
+                        <ul class="space-y-2.5 text-sm">
+                            <li class="flex items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-slate-800/70">
+                                <span class="font-medium">1. „Egyszerű” (és általános gráfok)</span>
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">2–3., 12–14. o.</span>
+                            </li>
+                            <li class="flex items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-slate-800/70">
+                                <span class="font-medium">2. „Gráf reprezentációk”</span>
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">4–5., 22., 26. o.</span>
+                            </li>
+                            <li class="flex items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-slate-800/70">
+                                <span class="font-medium">3. „Szélességi, mélységi” keresés</span>
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">38–39., 43–44. o.</span>
+                            </li>
+                            <li class="flex items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-slate-800/70">
+                                <span class="font-medium">4. „Hamilton-kör vagy zárt Euler-vonal”</span>
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">1., 9., 15–16., 145–153. o.</span>
+                            </li>
+                            <li class="flex items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-slate-800/70">
+                                <span class="font-medium">5. „Izomorfia” (+ füzetábra)</span>
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300">6–12., 14. o.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+        <!-- 1. TÉMAKÖR: EGYSZERŰ ÉS ÁLTALÁNOS GRÁFOK -->
+        <section id="egyszeru" class="scroll-mt-20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center">1</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Egyszerű gráfok és Általános gráfok</h2>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Könyv: 2–3. oldal (1.2. fejezet)
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Könyv: 12–14. oldal (1.4. fejezet)
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Egyszerű gráf kártya -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-brand-600 dark:text-brand-400">1.2.1. Definíció: Egyszerű gráf</h3>
+                        <span class="text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-mono">3. oldal</span>
+                    </div>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Egy <span class="font-mono font-semibold">G = (V, E)</span> párt <strong>egyszerű gráfnak</strong> nevezünk, ha <span class="font-mono">V</span> egy véges halmaz, és <span class="font-mono">E ⊆ [V]²</span> (a könyv jelölésével <span class="font-mono">V</span> kételemű részhalmazainak egy részhalmaza).
+                    </p>
+                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-disc list-inside">
+                        <li><strong>Csúcsok (pontok):</strong> A <span class="font-mono">V(G)</span> halmaz elemei.</li>
+                        <li><strong>Élek:</strong> Az <span class="font-mono">E(G)</span> halmaz elemei, azaz <span class="font-mono">e = {u, v} = uv</span> pontpárok.</li>
+                        <li><strong>Mit NEM tartalmazhat?</strong> Nincs benne <em>hurokél</em> (egy pont sem csatlakozik önmagához) és nincsenek <em>párhuzamos (többszörös) élek</em> (minden összekötés 1 multiplicitású).</li>
+                        <li><strong>Relációs szemlélet:</strong> Azonosítható egy <span class="font-mono">V</span> véges halmazon értelmezett <em>irreflexív</em> és <em>szimmetrikus</em> kétváltozós relációval (pl. kölcsönös ismeretség egy társaságban).</li>
+                    </ul>
+                </div>
+
+                <!-- Általános gráf és egyszerűsítés kártya -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400">1.4.1. Definíció: Általános gráf & Egyszerűsítés</h3>
+                        <span class="text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-mono">13–14. oldal</span>
+                    </div>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Amikor két objektum között több fizikai kapcsolat is lehet (pl. Königsberg hídjai), az egyszerű gráf nem elég. <span class="font-mono font-semibold">G = (V, E, I)</span> egy <strong>gráf</strong>, ha <span class="font-mono">V</span> és <span class="font-mono">E</span> halmazok, <span class="font-mono">I ⊆ V × E</span> az illeszkedési reláció, és minden <span class="font-mono">e ∈ E</span> élre a végpontok <span class="font-mono">V_e = {v ∈ V : vIe}</span> halmaza <strong>egy- vagy kételemű</strong>.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                            <div class="font-semibold text-xs uppercase text-amber-600 dark:text-amber-400 mb-1">Hurokél (1.4.2.)</div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300">Olyan <span class="font-mono">e</span> él, amelynek egyetlen végpontja van (<span class="font-mono">|V_e| = 1</span>). A fokszámot <strong>2-vel</strong> növeli! (28. o.)</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                            <div class="font-semibold text-xs uppercase text-amber-600 dark:text-amber-400 mb-1">Párhuzamos él (1.4.3.)</div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300">Két különböző <span class="font-mono">e</span> és <span class="font-mono">f</span> él párhuzamos, ha végponthalmazuk megegyezik: <span class="font-mono">V_e = V_f</span>.</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                            <div class="font-semibold text-xs uppercase text-amber-600 dark:text-amber-400 mb-1">Egyszerűsített G⁰ (1.4.4.)</div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300">A hurokélek elhagyásával és a párhuzamos élek egyetlen élre való cseréjével kapott egyszerű gráf.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TÉMAKÖR: GRÁF REPREZENTÁCIÓK + INTERAKTÍV MÁTRIX DEMÓ -->
+        <section id="reprezentaciok" class="scroll-mt-20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center">2</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Gráf reprezentációk</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Könyv: 4–5. oldal (1.2.4–1.2.5. def.)
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Irányított és Páros: 22. és 26. oldal
+                    </span>
+                </div>
+            </div>
+
+            <!-- 4 reprezentációs mód kártyái -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-mono text-brand-600 dark:text-brand-400 font-semibold">1. Halmazelméleti / Lista (3–4. o.)</span>
+                    <h3 class="font-bold text-base mt-1 mb-2">Halmazos megadás</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        A csúcshalmaz és az élhalmaz közvetlen felsorolása. Példa (1.2.2.): <br>
+                        <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded mt-1 inline-block">V(G)={u,v,w}, E(G)={uv,wv}</code>
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-mono text-brand-600 dark:text-brand-400 font-semibold">2. Geometriai ábrázolás (4. o.)</span>
+                    <h3 class="font-bold text-base mt-1 mb-2">Karikák és görbék</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        Minden csúcsnak egy <strong>kis karika</strong> felel meg a síkon (hogy ne keverjük össze az élek véletlen metszéspontjaival!), az éleknek pedig őket összekötő görbék.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-mono text-brand-600 dark:text-brand-400 font-semibold">3. Incidenciamátrix – I_G (4. o.)</span>
+                    <h3 class="font-bold text-base mt-1 mb-2">Pont-él illeszkedési mátrix</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        Mérete <span class="font-mono">|V| × |E|</span>. Sorok: pontok, oszlopok: élek. <span class="font-mono">I_G(v,e) = 1</span> ha <span class="font-mono">v ∈ e</span>, különben <span class="font-mono">0</span>. Minden oszlopban pontosan két darab 1-es áll. (Irányítottnál: kezdőpont -1, végpont +1, 22. o.)
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <span class="text-xs font-mono text-brand-600 dark:text-brand-400 font-semibold">4. Szomszédsági mátrix – A_G (5. o.)</span>
+                    <h3 class="font-bold text-base mt-1 mb-2">Csúcs-csúcs mátrix</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        Mérete <span class="font-mono">|V| × |V|</span> négyzetes, szimmetrikus mátrix, főátlójában 0-k állnak. <span class="font-mono">A_G(u,v) = 1</span>, ha <span class="font-mono">{u,v} ∈ E(G)</span>, különben <span class="font-mono">0</span>. (<span class="font-mono">(A^t)_uv</span> a <span class="font-mono">t</span> hosszú <span class="font-mono">uv</span> séták számát adja! – 18. o.)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Interaktív Mátrix Szimulátor -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <h3 class="font-bold text-lg flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Interaktív Reprezentáció Szimulátor
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            Kattints bármelyik szaggatott vagy folytonos élre a gráfon! Az él be- és kikapcsolásával valós időben frissül az <span class="font-mono">A_G</span> szomszédsági és az <span class="font-mono">I_G</span> illeszkedési mátrix.
+                        </p>
+                    </div>
+                    <button id="resetMatrixGraph" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                        Alaphelyzet visszaállítása
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- SVG Kattintható Gráf -->
+                    <div class="lg:col-span-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 rounded-xl p-4 border border-slate-200/70 dark:border-slate-800">
+                        <svg id="repGraphSvg" viewBox="0 0 260 220" class="w-full max-w-[260px] h-auto">
+                            <!-- Élek (kattinthatók) -->
+                            <g id="repEdgesLayer"></g>
+                            <!-- Csúcsok -->
+                            <g id="repNodesLayer"></g>
+                        </svg>
+                        <div id="repSetNotation" class="mt-3 text-xs font-mono text-center text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 w-full">
+                        </div>
+                    </div>
+
+                    <!-- Szomszédsági Mátrix A_G -->
+                    <div class="lg:col-span-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-sm text-brand-600 dark:text-brand-400">Szomszédsági mátrix (<span class="font-mono">A_G</span>)</span>
+                            <span class="text-xs font-mono text-slate-400">4 × 4 szimmetrikus</span>
+                        </div>
+                        <div id="adjMatrixContainer" class="overflow-x-auto bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200/70 dark:border-slate-800"></div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Sorösszeg = az adott csúcs <span class="font-mono">d(v)</span> fokszáma. Főátló mindig 0 (nincs hurokél).
+                        </p>
+                    </div>
+
+                    <!-- Illeszkedési Mátrix I_G -->
+                    <div class="lg:col-span-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-sm text-emerald-600 dark:text-emerald-400">Incidenciamátrix (<span class="font-mono">I_G</span>)</span>
+                            <span id="incMatrixDim" class="text-xs font-mono text-slate-400">4 × |E|</span>
+                        </div>
+                        <div id="incMatrixContainer" class="overflow-x-auto bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200/70 dark:border-slate-800"></div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Minden él oszlopában pontosan <strong>két darab 1-es</strong> szerepel (a két végpont).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TÉMAKÖR: SZÉLESSÉGI ÉS MÉLYSÉGI KERESÉS -->
+        <section id="kereses" class="scroll-mt-20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center">3</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Szélességi (BFS) és Mélységi (DFS) keresés</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Szélességi: 38–39. o. (2.2.9.) és 43. o. (2.3.27.)
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Mélységi: 44. oldal (2.3.30. feladat)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Elméleti összehasonlítás a könyv jelöléseivel -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-sky-600 dark:text-sky-400">Szélességi keresés (BFS)</h3>
+                        <span class="text-xs font-mono bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-2.5 py-1 rounded">2.2.9. & 2.3.27.</span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Egy <span class="font-mono">x₀</span> kiindulópontból rétegenként (<span class="font-mono">V₀, V₁, ..., V_k</span> halmazsorozatot definiálva) fedezi fel a gráfot:
+                    </p>
+                    <ul class="text-sm space-y-2 text-slate-600 dark:text-slate-300 list-disc list-inside">
+                        <li><span class="font-mono">V₀ = {x₀}</span>.</li>
+                        <li>Ha <span class="font-mono">V₀, V₁, ..., V_i</span> már definiált, akkor <span class="font-mono">V_{i+1}</span> azon még fel nem vett csúcsok halmaza, amelyek szomszédosak valamely <span class="font-mono">V_i</span>-beli ponttal. Addig folytatjuk, amíg <span class="font-mono">V_{k+1} = ∅</span> nem lesz.</li>
+                        <li><strong>Mit bizonyít a könyv?</strong> <span class="font-mono">V₀ ∪ ... ∪ V_k</span> pontosan az <span class="font-mono">x₀</span> csúcs összefüggőségi komponense, és <span class="font-mono">x ∈ V_i</span> akkor és csak akkor, ha a legrövidebb út hossza (távolsága) <span class="font-mono">d_G(x₀, x) = i</span>.</li>
+                        <li><strong>Szélességi keresőfa (43. o.):</strong> Ha minden <span class="font-mono">x ∈ V_i</span> csúcsot összekötünk egy <span class="font-mono">V_{i-1}</span>-beli szomszédjával, egy <span class="font-mono">x₀</span> gyökerű feszítőfát kapunk, amelyben minden gyökértől induló út <strong>legrövidebb út</strong> G-ben!</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-purple-600 dark:text-purple-400">Mélységi keresés (DFS)</h3>
+                        <span class="text-xs font-mono bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded">2.3.30. (44. o.)</span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Címkézési eljárás <span class="font-mono">x</span> csúcsból kiindulva, amely mindig az <strong>aktív csúcs</strong> egy még címkézetlen szomszédja felé lép tovább:
+                    </p>
+                    <ul class="text-sm space-y-2 text-slate-600 dark:text-slate-300 list-disc list-inside">
+                        <li><strong>Kezdőlépés:</strong> <span class="font-mono">x</span> címkéje <span class="font-mono">c(x)=0</span>, <span class="font-mono">x</span> az aktív csúcs, számláló <span class="font-mono">i = 1</span>, a fa élei <span class="font-mono">T = ∅</span>.</li>
+                        <li><strong>Kiterjesztés:</strong> Ha az <span class="font-mono">u</span> aktív csúcsnak van <span class="font-mono">v</span> címkézetlen szomszédja, akkor <span class="font-mono">c(v) = i</span>, <span class="font-mono">v</span> lesz az új aktív csúcs, <span class="font-mono">T</span>-hez adjuk az <span class="font-mono">uv</span> irányított élt, és <span class="font-mono">i</span>-t növeljük 1-gyel.</li>
+                        <li><strong>Bezárás és visszalépés:</strong> Ha <span class="font-mono">u</span>-nak nincs címkézetlen szomszédja, akkor <span class="font-mono">u</span>-t <em>„bezárjuk”</em>, és az aktív csúcs szerepét a <strong>legnagyobb címkéjű, még nem bezárt csúcs</strong> veszi át.</li>
+                        <li><strong>Mélységi keresőfa tulajdonság:</strong> Bármely G-beli <span class="font-mono">uv</span> élre (ha <span class="font-mono">c(u) > c(v)</span>) <span class="font-mono">v</span> rajta van a <span class="font-mono">T</span>-beli <span class="font-mono">x → u</span> úton (nincs „keresztél” külön ágak között).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Interaktív BFS / DFS animátor -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <h3 class="font-bold text-lg">Interaktív Bejárás Szimulátor (BFS vs. DFS)</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            Léptesd végig mindkét algoritmust ugyanazon a gráfon, és figyeld meg a keresőfa éleinek (<span class="font-mono">T</span>) kialakulását!
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="modeBFS" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm transition">
+                            Szélességi (BFS)
+                        </button>
+                        <button id="modeDFS" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">
+                            Mélységi (DFS)
+                        </button>
+                        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                        <button id="stepPrev" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">◀ Előző</button>
+                        <button id="stepNext" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition">Következő lépés ▶</button>
+                        <button id="stepReset" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Elejére</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-950 rounded-xl p-4 border border-slate-200/70 dark:border-slate-800 flex flex-col items-center">
+                        <svg id="searchSvg" viewBox="0 0 420 240" class="w-full max-w-[440px] h-auto">
+                            <g id="searchEdgesLayer"></g>
+                            <g id="searchNodesLayer"></g>
+                        </svg>
+                        <div class="flex flex-wrap gap-4 mt-2 text-xs text-slate-500">
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Aktív / Épp vizsgált</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-brand-600 inline-block"></span> Megcímkézett / Elért</span>
+                            <span class="flex items-center gap-1.5"><span class="w-4 h-1 bg-emerald-500 inline-block rounded"></span> Keresőfa éle (T)</span>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                            <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                                <span id="searchStepTitle">LÉPÉS: 0 / 6</span>
+                                <span id="searchAlgoBadge" class="text-sky-500 font-bold">BFS MÓD</span>
+                            </div>
+                            <p id="searchStepDesc" class="text-sm font-medium text-slate-800 dark:text-slate-200 min-h-[3.5rem]"></p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Elért csúcsok sorrendje / Rétegek</div>
+                            <div id="searchOrderBox" class="font-mono text-xs sm:text-sm text-brand-600 dark:text-brand-400"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TÉMAKÖR: HAMILTON-KÖR ÉS ZÁRT EULER-VONAL -->
+        <section id="euler-hamilton" class="scroll-mt-20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center">4</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Hamilton-kör keresése vagy zárt Euler-vonal van-e benne?</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Alapok: 1., 9., 12., 15–16. o.
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Euler & Hamilton fejezet: 145–155. o.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Alapfogalmak lánca (1.5. fejezet, 15-16. oldal) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+                <h3 class="font-bold text-base sm:text-lg mb-3">Előfeltétel fogalmak: Séta → Vonal → Út (Könyv 1.5. fejezet, 15–16. oldal)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                        <div class="font-bold text-sm text-brand-600 dark:text-brand-400">1. Séta és Körséta (1.5.2–1.5.3.)</div>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                            <span class="font-mono">v₀, e₁, v₁, ..., e_k, v_k</span> váltakozó csúcs-él sorozat, ahol <span class="font-mono">e_i</span> végpontjai <span class="font-mono">v_{i-1}</span> és <span class="font-mono">v_i</span>. Csúcs és él is ismétlődhet. Ha <span class="font-mono">v₀ = v_k</span> (<span class="font-mono">k>0</span>), akkor <strong>zárt séta (körséta)</strong>.
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                        <div class="font-bold text-sm text-emerald-600 dark:text-emerald-400">2. Vonal és Zárt vonal (1.5.4–1.5.5.)</div>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                            Olyan séta, amelyben <strong>az élek között nincs ismétlődés</strong> (pontok még ismétlődhetnek!). Ha <span class="font-mono">v₀ = v_k</span> (<span class="font-mono">k>0</span>), akkor <strong>körvonal (zárt vonal)</strong>. <em>Erre épül az Euler-vonal!</em>
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700">
+                        <div class="font-bold text-sm text-amber-600 dark:text-amber-400">3. Út és Kör (1.5.6–1.5.7.)</div>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                            Olyan séta, amelyben <strong>a csúcsok között sincs ismétlődés</strong>. Ha zárt vonalban <span class="font-mono">v₀ = v_k</span>-tól eltekintve nincs csúcsismétlődés, akkor <strong>kör</strong>. <em>Erre épül a Hamilton-kör!</em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Két nagy probléma részletes összehasonlítása -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Zárt Euler-vonal -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-emerald-500/30 dark:border-emerald-500/30 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">MINDEN ÉLEN EGYSZER</span>
+                        <span class="text-xs font-mono text-slate-400">1., 15–17., 145–148. o.</span>
+                    </div>
+                    <h3 class="text-xl font-bold">Zárt Euler-vonal (Euler-körvonal)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <strong>4.1.1. Definíció (145. o.):</strong> Egy <span class="font-mono">G</span> gráfban az <span class="font-mono">S</span> vonal <em>Euler-vonal</em>, ha a gráf <strong>összes élén</strong> pontosan egyszer halad át (és minden csúcsot érint: <span class="font-mono">E(S)=E(G), V(S)=V(G)</span>). Ha kezdő- és végpontja azonos, akkor <strong>zárt Euler-vonal</strong>.
+                    </p>
+                    <div class="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 space-y-2">
+                        <div class="font-bold text-sm text-emerald-900 dark:text-emerald-300">Mikor van benne? – Euler tétele (4.1.4. Tétel, 147. o.)</div>
+                        <ul class="text-xs sm:text-sm space-y-1.5 text-emerald-950 dark:text-emerald-200 list-disc list-inside">
+                            <li><strong>Zárt Euler-vonal:</strong> Akkor és csak akkor létezik, ha <span class="font-mono">G</span> <strong>összefüggő</strong>, és <strong>minden csúcsának fokszáma páros</strong>! (Az ilyen gráfot nevezi a könyv <em>Euler-gráfnak</em>, 4.1.5. def.)</li>
+                            <li><strong>Nyílt Euler-vonal (4.1.8. feladat, 148. o.):</strong> Akkor és csak akkor van benne (zárt vagy nyílt) Euler-vonal, ha <span class="font-mono">G</span> összefüggő, és <strong>legfeljebb két pontja páratlan fokú</strong> (0 vagy 2 darab).</li>
+                        </ul>
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                        <strong>Klasszikus példa (III. Probléma, 1. és 15. o.):</strong> <em>Königsberg 7 hídja</em>. A 4 szárazföldi egység fokszámai: 3, 3, 3, 5 (mind a 4 páratlan!), így sem zárt, sem nyílt Euler-vonal <strong>nem létezik</strong> benne. Ha könnyen ellenőrizhető a fokszámok paritása, a keresés gyors (polinomiális, pl. mohó vonalnövelés + betoldásos bővítés, 147. o.).
+                    </div>
+                </div>
+
+                <!-- Hamilton-kör -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-amber-500/30 dark:border-amber-500/30 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">MINDEN CSÚCSON EGYSZER</span>
+                        <span class="text-xs font-mono text-slate-400">1., 9., 153–156. o.</span>
+                    </div>
+                    <h3 class="text-xl font-bold">Hamilton-kör (és Hamilton-út)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <strong>Definíció (9. és 153. o.):</strong> Olyan kör (illetve út) a <span class="font-mono">G</span> gráfban, amely a gráf <strong>összes csúcsán pontosan egyszer</strong> halad át. Más szóval: egy <span class="font-mono">n = |V(G)|</span> pontú gráfban egy <span class="font-mono">C_n</span>-nel izomorf (feszítő) részgráf keresése.
+                    </p>
+                    <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 space-y-2">
+                        <div class="font-bold text-sm text-amber-900 dark:text-amber-300">Hogyan dönthető el, hogy van-e benne? (4.3. fejezet)</div>
+                        <ul class="text-xs sm:text-sm space-y-1.5 text-amber-950 dark:text-amber-200 list-disc list-inside">
+                            <li><strong>Nincs egyszerű szükséges és elégséges karakterizáció!</strong> (NP-nehéz probléma, szemben az Euler-vonallal).</li>
+                            <li><strong>Elégséges feltétel – Dirac tétele (153. o.):</strong> Ha egy <span class="font-mono">n ≥ 3</span> pontú egyszerű gráfban minden csúcs fokszáma <span class="font-mono">d(v) ≥ n/2</span>, akkor biztosan van benne Hamilton-kör.</li>
+                            <li><strong>Szükséges feltétel (kizárásra):</strong> Ha <span class="font-mono">G</span>-ben van Hamilton-kör, akkor kétszeresen összefüggő (nincs elvágó pontja vagy elsőfokú csúcsa), és páros gráf esetén a két színosztály elemszáma megegyezik (<span class="font-mono">|A| = |F|</span>).</li>
+                        </ul>
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                        <strong>Klasszikus példa (II. Probléma, 1. és 9. o.):</strong> <em>Sakktábla bejárása huszárral</em>. A 64 mező a csúcshalmaz, a szabályos huszárlépések az élek; a kérdés az, hogy van-e ebben a gráfban <span class="font-mono">C₆₄</span>-gyel izomorf részgráf.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TÉMAKÖR: IZOMORFIA ÉS A FÜZETBEN LERAJZOLT GRÁF -->
+        <section id="izomorfia" class="scroll-mt-20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-bold flex items-center justify-center">5</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Gráfok Izomorfiája és Izomorfiatípusok</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Könyv: 6–12. oldal (1.3. fejezet)
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/50">
+                        Általános gráfra: 14. oldal (1.4.5. def.)
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Definíciók és Invariánsok -->
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-brand-600 dark:text-brand-400">1.3.3. & 1.4.5. Definíció: Mikor izomorf két gráf?</h3>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Két egyszerű gráf, <span class="font-mono">G</span> és <span class="font-mono">H</span> <strong>izomorf</strong> (<span class="font-mono">G ≃ H</span>), ha létezik egy <span class="font-mono">φ : V(G) → V(H)</span> <strong>bijektív</strong> (kölcsönösen egyértelmű) leképezés a csúcshalmazaik között úgy, hogy tetszőleges <span class="font-mono">u, v ∈ V(G)</span> pontok akkor és csak akkor vannak összekötve <span class="font-mono">G</span>-ben, ha <span class="font-mono">φ(u)</span> és <span class="font-mono">φ(v)</span> is össze vannak kötve <span class="font-mono">H</span>-ban.
+                    </p>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                        <em>Megjegyzés:</em> Általános gráfoknál (1.4.5. def., 14. o.) egy <span class="font-mono">ψ : E(G) → E(H)</span> él-bijekció is szükséges, amely megőrzi az illeszkedést: <span class="font-mono">vI(G)e ⇔ φ(v)I(H)ψ(e)</span>. Ha <span class="font-mono">G = H</span>, akkor az izomorfizmust <strong>automorfizmusnak</strong> nevezzük, amelyek csoportot alkotnak (<span class="font-mono">Aut(G)</span>, 1.3.5. def.).
+                    </p>
+
+                    <div class="pt-2">
+                        <h4 class="font-bold text-sm mb-2">Hogyan vizsgáljuk az izomorfiát a feladatokban? (10–12. o.)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                            <div class="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
+                                <strong class="text-emerald-800 dark:text-emerald-300">Ha IGEN (izomorfak):</strong>
+                                <p class="text-slate-600 dark:text-slate-300 mt-1">Konkrétan meg kell adni a csúcsok közötti <span class="font-mono">φ</span> bijekciót (pl. mindkét gráfon megszámozzuk a csúcsokat 1-től n-ig úgy, hogy az élek megegyezzenek).</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900">
+                                <strong class="text-rose-800 dark:text-rose-300">Ha NEM (nem izomorfak):</strong>
+                                <p class="text-slate-600 dark:text-slate-300 mt-1">Mutatunk egy <strong>gráfinvariánst</strong>, amiben eltérnek: csúcsszám, élszám, fokszámsorozat, komponensek száma, legrövidebb kör (<span class="font-mono">C₃, C₄, C₅</span>) hossza, vagy elvágó csúcsok száma.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nevezetes izomorfiatípusok táblázata (7-8. oldal) -->
+                    <div class="pt-2">
+                        <h4 class="font-bold text-sm mb-2">Nevezetes izomorfiatípusok (Könyv 7–8. és 26. oldal)</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>E_n</strong> : n pontú üres gráf (0 él)</div>
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>K_n</strong> : n pontú teljes gráf</div>
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>P_n</strong> : n élű útgráf (n+1 pont)</div>
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>C_n</strong> : n pontú körgráf (n él)</div>
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>H_d</strong> : d-dimenziós hiperkocka (2^d pont)</div>
+                            <div class="p-2 rounded bg-slate-100 dark:bg-slate-800"><strong>K_{n,m}</strong> : teljes páros gráf</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- A füzetben szereplő rajz és a könyv 1.2.3. / 1.3.25. ábrája -->
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">A füzetedben lerajzolt gráf</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">4., 12. és 124. o.</span>
+                        </div>
+                        <h3 class="font-bold text-base">5-szög alapú 3-reguláris gráfok & Petersen-gráf</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                            A füzeted bal oldalán egy külső és egy belső ciklusból álló (10 csúcsú) gráf látható. A könyv <strong>4. oldalán (1.2.3. ábra H)</strong> és a <strong>12. oldalán (1.3.25. feladat)</strong> szerepelnek ezek az ábrák az izomorfia vizsgálatánál!
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <!-- G1: Petersen-gráf (belső csillag) -->
+                        <div class="text-center">
+                            <svg viewBox="0 0 160 160" class="w-full max-w-[135px] mx-auto">
+                                <!-- Külső 5-szög -->
+                                <polygon points="80,15 142,60 118,133 42,133 18,60" fill="none" stroke="#6366f1" stroke-width="2"/>
+                                <!-- Belső 5-ágú csillag -->
+                                <polygon points="80,45 100,110 45,70 115,70 60,110" fill="none" stroke="#6366f1" stroke-width="2"/>
+                                <!-- Összekötő küllők -->
+                                <line x1="80" y1="15" x2="80" y2="45" stroke="#6366f1" stroke-width="2"/>
+                                <line x1="142" y1="60" x2="115" y2="70" stroke="#6366f1" stroke-width="2"/>
+                                <line x1="118" y1="133" x2="100" y2="110" stroke="#6366f1" stroke-width="2"/>
+                                <line x1="42" y1="133" x2="60" y2="110" stroke="#6366f1" stroke-width="2"/>
+                                <line x1="18" y1="60" x2="45" y2="70" stroke="#6366f1" stroke-width="2"/>
+                                <!-- Csúcsok -->
+                                <g fill="#ffffff" stroke="#1e1b4b" stroke-width="2">
+                                    <circle cx="80" cy="15" r="4.5"/><circle cx="142" cy="60" r="4.5"/><circle cx="118" cy="133" r="4.5"/><circle cx="42" cy="133" r="4.5"/><circle cx="18" cy="60" r="4.5"/>
+                                    <circle cx="80" cy="45" r="4.5"/><circle cx="115" cy="70" r="4.5"/><circle cx="100" cy="110" r="4.5"/><circle cx="60" cy="110" r="4.5"/><circle cx="45" cy="70" r="4.5"/>
+                                </g>
+                            </svg>
+                            <div class="text-xs font-bold mt-1">G₁ (Petersen-gráf)</div>
+                            <div class="text-[11px] text-slate-500">Nincs benne C₄ kör (legrövidebb kör: 5)</div>
+                        </div>
+
+                        <!-- G2: 5-hasáb (belső 5-szög) -->
+                        <div class="text-center">
+                            <svg viewBox="0 0 160 160" class="w-full max-w-[135px] mx-auto">
+                                <!-- Külső 5-szög -->
+                                <polygon points="80,15 142,60 118,133 42,133 18,60" fill="none" stroke="#10b981" stroke-width="2"/>
+                                <!-- Belső 5-szög -->
+                                <polygon points="80,45 115,70 100,110 60,110 45,70" fill="none" stroke="#10b981" stroke-width="2"/>
+                                <!-- Összekötő küllők -->
+                                <line x1="80" y1="15" x2="80" y2="45" stroke="#10b981" stroke-width="2"/>
+                                <line x1="142" y1="60" x2="115" y2="70" stroke="#10b981" stroke-width="2"/>
+                                <line x1="118" y1="133" x2="100" y2="110" stroke="#10b981" stroke-width="2"/>
+                                <line x1="42" y1="133" x2="60" y2="110" stroke="#10b981" stroke-width="2"/>
+                                <line x1="18" y1="60" x2="45" y2="70" stroke="#10b981" stroke-width="2"/>
+                                <!-- Csúcsok -->
+                                <g fill="#ffffff" stroke="#064e3b" stroke-width="2">
+                                    <circle cx="80" cy="15" r="4.5"/><circle cx="142" cy="60" r="4.5"/><circle cx="118" cy="133" r="4.5"/><circle cx="42" cy="133" r="4.5"/><circle cx="18" cy="60" r="4.5"/>
+                                    <circle cx="80" cy="45" r="4.5"/><circle cx="115" cy="70" r="4.5"/><circle cx="100" cy="110" r="4.5"/><circle cx="60" cy="110" r="4.5"/><circle cx="45" cy="70" r="4.5"/>
+                                </g>
+                            </svg>
+                            <div class="text-xs font-bold mt-1">G₂ (Ötszöghasáb)</div>
+                            <div class="text-[11px] text-slate-500">Van benne C₄ kör (oldallapok)</div>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <strong>Miért jó példa ez a füzetrajzodhoz?</strong> Mindkettő 10 csúcsú, 15 élű, 3-reguláris egyszerű gráf, mégsem izomorfak (<span class="font-mono">G₁ ≄ G₂</span>), mert <span class="font-mono">G₂</span> tartalmaz 4 hosszú kört (<span class="font-mono">C₄</span>), míg a Petersen-gráf (<span class="font-mono">G₁</span>) nem! Ráadásul a Petersen-gráfban <strong>Hamilton-kör sincs</strong>, míg <span class="font-mono">G₂</span>-ben van.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ÖSSZEFOGLALÓ OLDALSZÁM-MUTATÓ ÉS GYORS KVÍZ -->
+        <section id="kviz" class="scroll-mt-20">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">Gyors Önellenőrző Kvíz a Füzetjegyzetből</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Ellenőrizd, hogy minden füzetben felírt kérdésre biztosan tudod-e a választ!</p>
+                    </div>
+                    <span id="quizScoreBadge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                        Pontszám: 0 / 4
+                    </span>
+                </div>
+
+                <div id="quizContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-200 dark:border-slate-800 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto px-4">
+            Készült Dr. Hajnal Péter: <em>Gráfelmélet</em> (SZTE Bolyai Intézet, POLYGON Jegyzettár, Szeged, 2003) című könyve és a füzetjegyzet alapján.
+        </div>
+    </footer>
+
+    <script>
+        // 1. Sötét / Világos téma váltás
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // 2. INTERAKTÍV REPREZENTÁCIÓ SZIMULÁTOR (A_G és I_G mátrixok)
+        const repNodes = [
+            { id: 0, label: 'v₁', x: 60, y: 45 },
+            { id: 1, label: 'v₂', x: 200, y: 45 },
+            { id: 2, label: 'v₃', x: 200, y: 175 },
+            { id: 3, label: 'v₄', x: 60, y: 175 }
+        ];
+
+        // Az összes lehetséges él a 4 csúcs között
+        const initialEdges = [
+            { u: 0, v: 1, active: true },
+            { u: 1, v: 2, active: true },
+            { u: 2, v: 3, active: true },
+            { u: 0, v: 3, active: false },
+            { u: 0, v: 2, active: true },
+            { u: 1, v: 3, active: false }
+        ];
+
+        let repEdges = JSON.parse(JSON.stringify(initialEdges));
+
+        function renderRepSimulator() {
+            const edgesLayer = document.getElementById('repEdgesLayer');
+            const nodesLayer = document.getElementById('repNodesLayer');
+            edgesLayer.innerHTML = '';
+            nodesLayer.innerHTML = '';
+
+            let activeEdgeCount = 0;
+
+            repEdges.forEach((edge, idx) => {
+                const n1 = repNodes[edge.u];
+                const n2 = repNodes[edge.v];
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', n1.x);
+                line.setAttribute('y1', n1.y);
+                line.setAttribute('x2', n2.x);
+                line.setAttribute('y2', n2.y);
+                line.setAttribute('class', 'edge-interactive');
+
+                if (edge.active) {
+                    activeEdgeCount++;
+                    line.setAttribute('stroke', '#4f46e5');
+                    line.setAttribute('stroke-width', '4');
+                } else {
+                    line.setAttribute('stroke', '#94a3b8');
+                    line.setAttribute('stroke-width', '2');
+                    line.setAttribute('stroke-dasharray', '5,5');
+                    line.setAttribute('opacity', '0.55');
+                }
+
+                line.addEventListener('click', () => {
+                    repEdges[idx].active = !repEdges[idx].active;
+                    renderRepSimulator();
+                });
+                edgesLayer.appendChild(line);
+
+                // Él felirat ha aktív
+                if (edge.active) {
+                    const midX = (n1.x + n2.x) / 2 + (edge.u === 0 && edge.v === 2 ? -12 : (edge.u === 1 && edge.v === 3 ? 12 : 0));
+                    const midY = (n1.y + n2.y) / 2 - 6;
+                    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    txt.setAttribute('x', midX);
+                    txt.setAttribute('y', midY);
+                    txt.setAttribute('text-anchor', 'middle');
+                    txt.setAttribute('fill', '#10b981');
+                    txt.setAttribute('font-size', '11');
+                    txt.setAttribute('font-weight', 'bold');
+                    txt.textContent = `e${activeEdgeCount}`;
+                    edgesLayer.appendChild(txt);
+                }
+            });
+
+            // Csúcsok kirajzolása
+            repNodes.forEach(n => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', n.x);
+                c.setAttribute('cy', n.y);
+                c.setAttribute('r', '18');
+                c.setAttribute('fill', '#4f46e5');
+                c.setAttribute('stroke', '#ffffff');
+                c.setAttribute('stroke-width', '3');
+
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', n.x);
+                t.setAttribute('y', n.y + 4);
+                t.setAttribute('text-anchor', 'middle');
+                t.setAttribute('fill', '#ffffff');
+                t.setAttribute('font-size', '12');
+                t.setAttribute('font-weight', 'bold');
+                t.textContent = n.label;
+
+                g.appendChild(c);
+                g.appendChild(t);
+                nodesLayer.appendChild(g);
+            });
+
+            // Halmazos felírás frissítése
+            const activeList = repEdges.filter(e => e.active).map((e, i) => `e${i+1}=${repNodes[e.u].label}${repNodes[e.v].label}`);
+            document.getElementById('repSetNotation').textContent =
+                `E(G) = { ${activeList.length ? activeList.join(', ') : '∅'} }`;
+
+            // Szomszédsági mátrix A_G építése
+            const adj = Array.from({ length: 4 }, () => Array(4).fill(0));
+            repEdges.forEach(e => {
+                if (e.active) {
+                    adj[e.u][e.v] = 1;
+                    adj[e.v][e.u] = 1;
+                }
+            });
+
+            let adjHtml = `<table class="w-full text-center font-mono text-xs border-collapse"><thead><tr><th class="p-1.5 text-slate-400">A_G</th>`;
+            repNodes.forEach(n => adjHtml += `<th class="p-1.5 text-brand-600 dark:text-brand-400">${n.label}</th>`);
+            adjHtml += `<th class="p-1.5 text-slate-400">d(v)</th></tr></thead><tbody>`;
+
+            for (let i = 0; i < 4; i++) {
+                let deg = 0;
+                adjHtml += `<tr><th class="p-1.5 text-brand-600 dark:text-brand-400">${repNodes[i].label}</th>`;
+                for (let j = 0; j < 4; j++) {
+                    deg += adj[i][j];
+                    const highlight = adj[i][j] === 1
+                        ? 'bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-bold'
+                        : 'text-slate-400';
+                    adjHtml += `<td class="p-1.5 border border-slate-200 dark:border-slate-800 ${highlight}">${adj[i][j]}</td>`;
+                }
+                adjHtml += `<td class="p-1.5 font-bold text-amber-600 dark:text-amber-400">${deg}</td></tr>`;
+            }
+            adjHtml += `</tbody></table>`;
+            document.getElementById('adjMatrixContainer').innerHTML = adjHtml;
+
+            // Incidenciamátrix I_G építése
+            const activeEdges = repEdges.filter(e => e.active);
+            document.getElementById('incMatrixDim').textContent = `4 × ${activeEdges.length}`;
+
+            if (activeEdges.length === 0) {
+                document.getElementById('incMatrixContainer').innerHTML =
+                    `<div class="text-xs text-center py-8 text-slate-400 font-mono">Üres gráf (0 oszlop)</div>`;
+            } else {
+                let incHtml = `<table class="w-full text-center font-mono text-xs border-collapse"><thead><tr><th class="p-1.5 text-slate-400">I_G</th>`;
+                activeEdges.forEach((_, idx) => incHtml += `<th class="p-1.5 text-emerald-600 dark:text-emerald-400">e${idx+1}</th>`);
+                incHtml += `</tr></thead><tbody>`;
+
+                for (let v = 0; v < 4; v++) {
+                    incHtml += `<tr><th class="p-1.5 text-brand-600 dark:text-brand-400">${repNodes[v].label}</th>`;
+                    activeEdges.forEach(e => {
+                        const val = (e.u === v || e.v === v) ? 1 : 0;
+                        const cls = val === 1
+                            ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold'
+                            : 'text-slate-400';
+                        incHtml += `<td class="p-1.5 border border-slate-200 dark:border-slate-800 ${cls}">${val}</td>`;
+                    });
+                    incHtml += `</tr>`;
+                }
+                incHtml += `</tbody></table>`;
+                document.getElementById('incMatrixContainer').innerHTML = incHtml;
+            }
+        }
+
+        document.getElementById('resetMatrixGraph').addEventListener('click', () => {
+            repEdges = JSON.parse(JSON.stringify(initialEdges));
+            renderRepSimulator();
+        });
+
+        // 3. SZÉLESSÉGI (BFS) ÉS MÉLYSÉGI (DFS) KERESÉS SZIMULÁTOR
+        const sNodes = [
+            { id: 'A', x: 210, y: 35 },
+            { id: 'B', x: 105, y: 110 },
+            { id: 'C', x: 315, y: 110 },
+            { id: 'D', x: 55,  y: 200 },
+            { id: 'E', x: 165, y: 200 },
+            { id: 'F', x: 315, y: 200 }
+        ];
+
+        const sEdges = [
+            { u: 'A', v: 'B' },
+            { u: 'A', v: 'C' },
+            { u: 'B', v: 'D' },
+            { u: 'B', v: 'E' },
+            { u: 'C', v: 'E' },
+            { u: 'C', v: 'F' }
+        ];
+
+        const bfsSteps = [
+            {
+                active: 'A', visited: ['A'], treeEdges: [],
+                desc: 'Kezdőlépés (2.2.9.): V₀ = {A}. A kiindulópont távolsága d(A,A) = 0.',
+                order: 'V₀ = { A }'
+            },
+            {
+                active: 'B', visited: ['A', 'B', 'C'], treeEdges: ['A-B', 'A-C'],
+                desc: '1. réteg (V₁): A szomszédait vesszük fel: V₁ = {B, C}. Mindkettő távolsága 1, bekerülnek az A-B és A-C szélességi fa-élek.',
+                order: 'V₀ = {A} → V₁ = {B, C}'
+            },
+            {
+                active: 'D', visited: ['A', 'B', 'C', 'D', 'E'], treeEdges: ['A-B', 'A-C', 'B-D', 'B-E'],
+                desc: '2. réteg (V₂) B-ből: B még el nem ért szomszédai D és E. Hozzáadjuk a B-D és B-E fa-éleket.',
+                order: 'V₀ = {A} → V₁ = {B, C} → V₂ = {D, E...}'
+            },
+            {
+                active: 'F', visited: ['A', 'B', 'C', 'D', 'E', 'F'], treeEdges: ['A-B', 'A-C', 'B-D', 'B-E', 'C-F'],
+                desc: '2. réteg (V₂) befejezése C-ből: E már címkézett, csak F új! Hozzáadjuk a C-F élt. V₃ = ∅, a szélességi keresőfa kész!',
+                order: 'V₀ = {A} → V₁ = {B, C} → V₂ = {D, E, F} (Kész!)'
+            }
+        ];
+
+        const dfsSteps = [
+            {
+                active: 'A', visited: ['A'], treeEdges: [],
+                desc: 'Kezdőlépés (2.3.30.): c(A)=0, A az aktív csúcs. Címkézetlen szomszéd keresése.',
+                order: 'c(A)=0'
+            },
+            {
+                active: 'B', visited: ['A', 'B'], treeEdges: ['A-B'],
+                desc: 'Kiterjesztés: A-ból átlépünk B-be. c(B)=1, B az új aktív csúcs, T = {A→B}.',
+                order: 'c(A)=0 → c(B)=1'
+            },
+            {
+                active: 'D', visited: ['A', 'B', 'D'], treeEdges: ['A-B', 'B-D'],
+                desc: 'Kiterjesztés: B-ből átlépünk D-be. c(D)=2, D az aktív csúcs. D-nek nincs új szomszédja, így D-t bezárjuk és visszalépünk B-re!',
+                order: 'c(A)=0 → c(B)=1 → c(D)=2 (D bezárva)'
+            },
+            {
+                active: 'E', visited: ['A', 'B', 'D', 'E'], treeEdges: ['A-B', 'B-D', 'B-E'],
+                desc: 'Kiterjesztés B-ből: B másik címkézetlen szomszédja E. c(E)=3, E lesz az aktív csúcs, T bővül B→E éllel.',
+                order: 'A(0) → B(1) → D(2) → E(3)'
+            },
+            {
+                active: 'C', visited: ['A', 'B', 'D', 'E', 'C'], treeEdges: ['A-B', 'B-D', 'B-E', 'C-E'],
+                desc: 'Kiterjesztés E-ből: E-nek van címkézetlen szomszédja (C)! Átlépünk C-be: c(C)=4, T bővül E→C éllel.',
+                order: 'A(0) → B(1) → D(2) → E(3) → C(4)'
+            },
+            {
+                active: 'F', visited: ['A', 'B', 'D', 'E', 'C', 'F'], treeEdges: ['A-B', 'B-D', 'B-E', 'C-E', 'C-F'],
+                desc: 'Kiterjesztés C-ből: C-ből elérjük F-et (c(F)=5). Minden csúcsot megcímkéztünk, kész a mélységi keresőfa!',
+                order: 'A(0) → B(1) → D(2) → E(3) → C(4) → F(5) (Kész!)'
+            }
+        ];
+
+        let currentSearchMode = 'BFS';
+        let currentStepIdx = 0;
+
+        function renderSearchSimulator() {
+            const steps = currentSearchMode === 'BFS' ? bfsSteps : dfsSteps;
+            const state = steps[currentStepIdx];
+
+            const edgesLayer = document.getElementById('searchEdgesLayer');
+            const nodesLayer = document.getElementById('searchNodesLayer');
+            edgesLayer.innerHTML = '';
+            nodesLayer.innerHTML = '';
+
+            const nodeMap = {};
+            sNodes.forEach(n => nodeMap[n.id] = n);
+
+            sEdges.forEach(e => {
+                const key1 = `${e.u}-${e.v}`;
+                const key2 = `${e.v}-${e.u}`;
+                const inTree = state.treeEdges.includes(key1) || state.treeEdges.includes(key2);
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', nodeMap[e.u].x);
+                line.setAttribute('y1', nodeMap[e.u].y);
+                line.setAttribute('x2', nodeMap[e.v].x);
+                line.setAttribute('y2', nodeMap[e.v].y);
+                line.setAttribute('stroke', inTree ? '#10b981' : '#94a3b8');
+                line.setAttribute('stroke-width', inTree ? '5' : '2');
+                if (!inTree) line.setAttribute('stroke-dasharray', '4,4');
+                edgesLayer.appendChild(line);
+            });
+
+            sNodes.forEach(n => {
+                const isVisited = state.visited.includes(n.id);
+                const isActive = state.active === n.id;
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', n.x);
+                c.setAttribute('cy', n.y);
+                c.setAttribute('r', isActive ? '21' : '18');
+                c.setAttribute('class', 'node-circle');
+
+                if (isActive) {
+                    c.setAttribute('fill', '#f59e0b');
+                } else if (isVisited) {
+                    c.setAttribute('fill', '#4f46e5');
+                } else {
+                    c.setAttribute('fill', '#64748b');
+                }
+                c.setAttribute('stroke', '#ffffff');
+                c.setAttribute('stroke-width', '3');
+
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', n.x);
+                t.setAttribute('y', n.y + 5);
+                t.setAttribute('text-anchor', 'middle');
+                t.setAttribute('fill', '#ffffff');
+                t.setAttribute('font-size', '13');
+                t.setAttribute('font-weight', 'bold');
+                t.textContent = n.id;
+
+                g.appendChild(c);
+                g.appendChild(t);
+                nodesLayer.appendChild(g);
+            });
+
+            document.getElementById('searchStepTitle').textContent = `LÉPÉS: ${currentStepIdx + 1} / ${steps.length}`;
+            document.getElementById('searchAlgoBadge').textContent = currentSearchMode === 'BFS' ? 'SZÉLESSÉGI (BFS)' : 'MÉLYSÉGI (DFS)';
+            document.getElementById('searchStepDesc').textContent = state.desc;
+            document.getElementById('searchOrderBox').textContent = state.order;
+        }
+
+        document.getElementById('modeBFS').addEventListener('click', () => {
+            currentSearchMode = 'BFS';
+            currentStepIdx = 0;
+            document.getElementById('modeBFS').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm transition';
+            document.getElementById('modeDFS').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition';
+            renderSearchSimulator();
+        });
+
+        document.getElementById('modeDFS').addEventListener('click', () => {
+            currentSearchMode = 'DFS';
+            currentStepIdx = 0;
+            document.getElementById('modeDFS').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition';
+            document.getElementById('modeBFS').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition';
+            renderSearchSimulator();
+        });
+
+        document.getElementById('stepNext').addEventListener('click', () => {
+            const max = (currentSearchMode === 'BFS' ? bfsSteps : dfsSteps).length - 1;
+            if (currentStepIdx < max) {
+                currentStepIdx++;
+                renderSearchSimulator();
+            }
+        });
+
+        document.getElementById('stepPrev').addEventListener('click', () => {
+            if (currentStepIdx > 0) {
+                currentStepIdx--;
+                renderSearchSimulator();
+            }
+        });
+
+        document.getElementById('stepReset').addEventListener('click', () => {
+            currentStepIdx = 0;
+            renderSearchSimulator();
+        });
+
+        // 4. ÖNELLENŐRZŐ KVÍZ
+        const quizQuestions = [
+            {
+                q: "1. Mit tartalmaz egy G egyszerű gráf I_G pont-él incidenciamátrixának minden egyes oszlopa? (Könyv 4. o.)",
+                options: [
+                    "Pontosan két darab 1-est, a többi elem 0.",
+                    "A csúcs fokszámának megfelelő számú 1-est.",
+                    "Csupa 0-t a főátlóban."
+                ],
+                correct: 0,
+                explanation: "Mivel egyszerű gráfban minden élnek pontosan két különböző végpontja van, így minden élhez tartozó oszlopban pontosan két darab 1-es áll (4. oldal, 1.2.4. definíció utáni megjegyzés)."
+            },
+            {
+                q: "2. Milyen szükséges és elégséges feltételt ad Euler tétele (4.1.4. tétel, 147. o.) arra, hogy egy gráfban létezzen zárt Euler-vonal?",
+                options: [
+                    "Minden csúcs fokszáma legalább n/2 legyen.",
+                    "A gráf legyen összefüggő, és minden csúcsának fokszáma legyen páros.",
+                    "A gráf legyen páros gráf és ne tartalmazzon hurokélt."
+                ],
+                correct: 1,
+                explanation: "Egy G gráfban akkor és csak akkor van zárt Euler-vonal (Euler-körvonal), ha G összefüggő és minden pontjának fokszáma páros."
+            },
+            {
+                q: "3. Mit garantál a szélességi keresés (BFS) által felépített szélességi keresőfa? (Könyv 43. o., 2.3.27. feladat)",
+                options: [
+                    "A gyökértől bármely elért x csúcsba vezető fa-beli út egy legrövidebb út G-ben.",
+                    "Minden élét pontosan egyszer járja be egy Hamilton-kör.",
+                    "Mindig kevesebb éle van, mint a mélységi keresőfának."
+                ],
+                correct: 0,
+                explanation: "A szélességi keresés rétegenként (V₀, V₁, ..., V_k) halad, így x ∈ V_i esetén d_G(x₀, x) = i, a fa-beli út pedig legrövidebb."
+            },
+            {
+                q: "4. Mi a különbség a Hamilton-kör és a zárt Euler-vonal között? (Könyv 9., 16., 145., 153. o.)",
+                options: [
+                    "Nincs különbség, a két fogalom izomorf.",
+                    "A zárt Euler-vonal minden élen, míg a Hamilton-kör minden csúcson halad át pontosan egyszer.",
+                    "A Hamilton-körben ismétlődhetnek csúcsok, az Euler-vonalban nem."
+                ],
+                correct: 1,
+                explanation: "A zárt Euler-vonal az összes élt járja be egyszer (pontok ismétlődhetnek), míg a Hamilton-kör az összes csúcsot érinti pontosan egyszer."
+            }
+        ];
+
+        const answeredState = {};
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+
+            quizQuestions.forEach((item, qIdx) => {
+                const card = document.createElement('div');
+                card.className = 'p-5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3';
+
+                const title = document.createElement('h4');
+                title.className = 'font-bold text-sm sm:text-base';
+                title.textContent = item.q;
+                card.appendChild(title);
+
+                const optList = document.createElement('div');
+                optList.className = 'space-y-2';
+
+                item.options.forEach((optText, oIdx) => {
+                    const btn = document.createElement('button');
+                    const chosen = answeredState[qIdx];
+                    let btnStyle = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-brand-500';
+
+                    if (chosen !== undefined) {
+                        if (oIdx === item.correct) {
+                            btnStyle = 'bg-emerald-100 dark:bg-emerald-950/70 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-semibold';
+                        } else if (oIdx === chosen) {
+                            btnStyle = 'bg-rose-100 dark:bg-rose-950/70 border-rose-500 text-rose-900 dark:text-rose-200';
+                        }
+                    }
+
+                    btn.className = `w-full text-left text-xs sm:text-sm p-3 rounded-lg border transition ${btnStyle}`;
+                    btn.textContent = optText;
+                    btn.addEventListener('click', () => {
+                        answeredState[qIdx] = oIdx;
+                        updateQuizScore();
+                        renderQuiz();
+                    });
+                    optList.appendChild(btn);
+                });
+
+                card.appendChild(optList);
+
+                if (answeredState[qIdx] !== undefined) {
+                    const exp = document.createElement('div');
+                    exp.className = 'text-xs text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-800';
+                    exp.innerHTML = `<strong>Magyarázat:</strong> ${item.explanation}`;
+                    card.appendChild(exp);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function updateQuizScore() {
+            let score = 0;
+            quizQuestions.forEach((item, idx) => {
+                if (answeredState[idx] === item.correct) score++;
+            });
+            document.getElementById('quizScoreBadge').textContent = `Pontszám: ${score} / ${quizQuestions.length}`;
+        }
+
+        // Inicializálás betöltéskor
+        window.onload = function() {
+            renderRepSimulator();
+            renderSearchSimulator();
+            renderQuiz();
+        };
+    </script>
+</body>
+</html>
