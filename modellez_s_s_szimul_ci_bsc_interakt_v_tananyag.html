@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="hu" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modellezés és szimuláció BSc – Interaktív Tanulási Portál</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef7ff',
+              100: '#d9ecff',
+              200: '#bcdeff',
+              300: '#8ecaff',
+              400: '#59abff',
+              500: '#3388ff',
+              600: '#1b66f5',
+              700: '#1450e1',
+              800: '#1741b6',
+              900: '#193b8f',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- KaTeX CSS & JS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    /* Finom görgetősáv és KaTeX igazítás */
+    .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.5rem 0;
+    }
+    /* Rejtett scrollbar oldalsávban */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Finom animáció fülváltáshoz */
+    .tab-panel {
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+
+  <!-- Felső olvasási haladásjelző -->
+  <div class="fixed top-0 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-800 z-50">
+    <div id="reading-progress" class="h-full bg-gradient-to-r from-brand-500 via-teal-500 to-indigo-500 w-0 transition-all duration-150"></div>
+  </div>
+
+  <!-- Mobil felső fejléc -->
+  <header class="lg:hidden sticky top-1 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <button id="mobile-menu-btn" aria-label="Menü megnyitása" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <span class="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-tight">ModSim BSc</span>
+        <span class="text-[11px] text-slate-500 dark:text-slate-400">Interaktív Tananyag</span>
+      </div>
+    </div>
+    <button id="theme-toggle-mobile" aria-label="Téma váltása" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+      <svg class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      <svg class="w-5 h-5 block dark:hidden text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    </button>
+  </header>
+
+  <!-- Mobil háttérmaszk -->
+  <div id="mobile-overlay" class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+  <!-- Fő elrendezés -->
+  <div class="flex min-h-screen pt-1">
+
+    <!-- Bal oldali navigációs oldalsáv -->
+    <aside id="sidebar" class="fixed lg:sticky top-1 left-0 z-50 lg:z-30 h-[calc(100vh-4px)] w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
+      <!-- Logó és cím -->
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-teal-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-brand-500/20">
+            MS
+          </div>
+          <div>
+            <h1 class="font-bold text-base text-slate-900 dark:text-white leading-tight">Modellezés és szimuláció</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">BSc Vizsgafelkészítő</p>
+          </div>
+        </div>
+        <button id="close-sidebar-btn" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Navigációs fülek -->
+      <nav class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-1.5" aria-label="Fő navigáció">
+        <div class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tananyag modulok</div>
+
+        <button data-tab="mod1" class="nav-btn w-full text-left px-3.5 py-3 rounded-xl flex items-start gap-3 transition group bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 font-semibold">
+          <span class="mt-0.5 w-6 h-6 rounded-lg bg-brand-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+          <span class="text-sm leading-snug">Véletlenszám-generálás &amp; Monte Carlo</span>
+        </button>
+
+        <button data-tab="mod2" class="nav-btn w-full text-left px-3.5 py-3 rounded-xl flex items-start gap-3 transition group text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span class="mt-0.5 w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center shrink-0">2</span>
+          <span class="text-sm leading-snug">Diszkrét modellek &amp; nemlineáris dinamika</span>
+        </button>
+
+        <button data-tab="mod3" class="nav-btn w-full text-left px-3.5 py-3 rounded-xl flex items-start gap-3 transition group text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span class="mt-0.5 w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center shrink-0">3</span>
+          <span class="text-sm leading-snug">Markov-láncok &amp; Monte Carlo módszer</span>
+        </button>
+
+        <div class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Gyakorlás &amp; Eszközök</div>
+
+        <button data-tab="cheatsheet" class="nav-btn w-full text-left px-3.5 py-3 rounded-xl flex items-center gap-3 transition group text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span class="w-6 h-6 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs font-bold flex items-center justify-center shrink-0">∑</span>
+          <span class="text-sm leading-snug">Képletgyűjtemény &amp; Python puskák</span>
+        </button>
+
+        <button data-tab="quiz" class="nav-btn w-full text-left px-3.5 py-3 rounded-xl flex items-center gap-3 transition group text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span class="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center justify-center shrink-0">✓</span>
+          <span class="text-sm leading-snug">Önellenőrzés &amp; Vizsgakvíz</span>
+        </button>
+      </nav>
+
+      <!-- Oldalsáv lábléc (Témaváltó) -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+        <button id="theme-toggle-desktop" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium flex items-center justify-center gap-2 transition">
+          <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg class="w-4 h-4 block dark:hidden text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <span class="dark:hidden">Sötét mód bekapcsolása</span>
+          <span class="hidden dark:inline">Világos mód bekapcsolása</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Fő tartalmi terület -->
+    <main class="flex-1 min-w-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-8 pb-24">
+
+      <!-- ===================================================================== -->
+      <!-- 1. MODUL: VÉLETLENSZÁM-GENERÁLÁS ÉS MONTE CARLO SZIMULÁCIÓ             -->
+      <!-- ===================================================================== -->
+      <section id="tab-mod1" class="tab-panel space-y-8">
+        <!-- Fejléc kártya -->
+        <div class="rounded-3xl bg-gradient-to-br from-brand-600 via-brand-700 to-teal-700 text-white p-6 sm:p-8 shadow-lg shadow-brand-600/15">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase mb-3">
+            1. Modul • ModSim BSc 08
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Véletlenszám-generálás és Monte Carlo szimuláció</h2>
+          <p class="text-brand-100 text-sm sm:text-base max-w-2xl">
+            Pszeudovéletlen generátorok, eloszlások előállítása inverz transzformációval, valamint statisztikai becslés és integrálás Monte Carlo-módszerrel.
+          </p>
+        </div>
+
+        <!-- Tanulási célok & Miért kell véletlenszám? -->
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+              <span class="w-2 h-6 rounded-full bg-brand-500"></span> Tanulási célok
+            </h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-disc pl-5">
+              <li>Értsük a <strong>pszeudovéletlen számok</strong> fogalmát és a reprodukálhatóságot.</li>
+              <li>Ismerjük a fő generálási módszereket (LCG, Mersenne Twister, PCG).</li>
+              <li>Tudjunk különböző valószínűségi eloszlásokat előállítani (egyenletes, normális, exponenciális).</li>
+              <li>Értsük és programozzuk a <strong>Monte Carlo-módszert</strong> (becslés, integrálás, konvergencia).</li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+              <span class="w-2 h-6 rounded-full bg-teal-500"></span> Miért kell véletlenszám?
+            </h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <li><strong class="text-slate-900 dark:text-white">Szimuláció:</strong> bizonytalan érkezési és kiszolgálási idők modellezése.</li>
+              <li><strong class="text-slate-900 dark:text-white">Játékok:</strong> véletlenszerű események, ellenfelek, pályagenerálás.</li>
+              <li><strong class="text-slate-900 dark:text-white">Optimalizálás:</strong> véletlen keresés (random search) nagy keresési terekben.</li>
+              <li><strong class="text-slate-900 dark:text-white">Statisztika:</strong> mintavétel, hipotézisvizsgálat és becslés.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- TRNG vs PRNG és Seed -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Valódi (TRNG) vs. Pszeudovéletlen (PRNG) és a Seed</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-brand-600 dark:text-brand-400 mb-1">TRNG (True Random Number Generator)</div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">Fizikai zajon alapul (pl. termikus zaj, radioaktív bomlás). Nem reprodukálható, lassabb, inkább kriptográfiai kulcsokhoz használják.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-teal-600 dark:text-teal-400 mb-1">PRNG (Pseudo-Random Number Generator)</div>
+              <p class="text-sm text-slate-600 dark:text-slate-300"><strong>Determinisztikus algoritmus</strong>, amely statisztikailag véletlenszerűnek tűnő számokat állít elő. Azonos <em>seed</em> $\rightarrow$ azonos számsorozat. <strong>Szimulációhoz jellemzően PRNG-t használunk.</strong></p>
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 text-sm text-indigo-950 dark:text-indigo-200">
+            <strong class="block mb-1">A seed és a reprodukálhatóság:</strong>
+            A <strong>seed</strong> (kezdőmag) inicializálja a generátor belső állapotát. Azonos seed esetén a kísérlet pontosan megismételhető (ehhez azonos algoritmus és szoftverkörnyezet is szükséges). Tudományos publikációkban és hibakereséskor a seedet mindig érdemes rögzíteni!
+          </div>
+        </div>
+
+        <!-- Egyenletes eloszlás -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Az egyenletes eloszlás – az alapeloszlás</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+            A szimulációk kiindulópontja a standard egyenletes eloszlás: $$U \sim \text{Uniform}(0,1)$$
+          </p>
+          <ul class="space-y-1.5 text-sm text-slate-600 dark:text-slate-300 list-disc pl-5">
+            <li>Minden azonos hosszúságú részintervallum egyformán valószínű a $[0, 1)$ tartományban.</li>
+            <li>Szinte az összes többi eloszlás (normális, exponenciális, diszkrét) ebből állítható elő transzformációval.</li>
+            <li>Véges mintán (pl. 10 000 elem hisztogramján) a véletlen ingadozás miatt kisebb eltérések teljesen természetesek a várható szinttől.</li>
+          </ul>
+        </div>
+
+        <!-- Lineáris kongruens generátor (LCG) + Interaktív szimulátor -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Lineáris kongruens generátor (LCG)</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              Egyszerű egész aritmetikát használó klasszikus PRNG, amelynek paraméterei a szorzó ($a$), az eltolás ($c$), a modulus ($m$) és a kezdeti állapot ($x_0$):
+            </p>
+            <div class="my-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 text-center">
+              $$x_{n+1} = (a \cdot x_n + c) \bmod m$$
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-2">Kézi példa ($a=5, c=3, m=16, x_0=7$)</div>
+              <ul class="space-y-1 text-slate-600 dark:text-slate-300 font-mono text-xs sm:text-sm">
+                <li>$x_1 = (5 \cdot 7 + 3) \bmod 16 = 38 \bmod 16 = \mathbf{6}$</li>
+                <li>$x_2 = (5 \cdot 6 + 3) \bmod 16 = 33 \bmod 16 = \mathbf{1}$</li>
+                <li>$x_3 = (5 \cdot 1 + 3) \bmod 16 = 8 \bmod 16 = \mathbf{8}$</li>
+              </ul>
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">A sorozat végül periodikusan ismétlődik.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
+              <div class="font-bold text-amber-900 dark:text-amber-300 mb-2">Korlátok és veszélyek</div>
+              <ul class="space-y-1 text-amber-900/80 dark:text-amber-200/80 list-disc pl-4">
+                <li>A sorozat <strong>legfeljebb $m$</strong> különböző állapotot érhet el.</li>
+                <li>Rossz paraméterválasztással nagyon rövid ciklus keletkezhet.</li>
+                <li>Kriptográfiai / biztonsági célra egyszerű LCG <strong>nem megfelelő</strong> (állapota kiszámítható).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Python kód példa -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
+              <span>Python – LCG példa</span>
+              <button onclick="copyCode(this)" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 hover:bg-brand-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 transition">Másolás</button>
+            </div>
+            <pre class="p-4 bg-slate-900 text-slate-100 text-xs sm:text-sm font-mono overflow-x-auto"><code>x = 7
+a, c, m = 5, 3, 16
+for i in range(12):
+    x = (a * x + c) % m
+    print(i, x)</code></pre>
+          </div>
+
+          <!-- INTERAKTÍV LCG SZIMULÁTOR -->
+          <div class="rounded-2xl border-2 border-brand-200 dark:border-brand-900/60 bg-brand-50/40 dark:bg-slate-950/60 p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
+                Interaktív LCG Szimulátor
+              </h4>
+              <div class="flex gap-2">
+                <button onclick="setLCGPreset(5,3,16,7)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">Teljes periódus (5,3,16)</button>
+                <button onclick="setLCGPreset(4,2,16,1)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">Rövid ciklus (4,2,16)</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <label class="block">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Szorzó (a)</span>
+                <input id="lcg-a" type="number" value="5" min="1" max="1000" class="mt-1 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              </label>
+              <label class="block">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Eltolás (c)</span>
+                <input id="lcg-c" type="number" value="3" min="0" max="1000" class="mt-1 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              </label>
+              <label class="block">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Modulus (m)</span>
+                <input id="lcg-m" type="number" value="16" min="2" max="256" class="mt-1 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              </label>
+              <label class="block">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Seed (x₀)</span>
+                <input id="lcg-x0" type="number" value="7" min="0" max="255" class="mt-1 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+              </label>
+            </div>
+
+            <div id="lcg-stats" class="flex flex-wrap gap-3 text-xs sm:text-sm"></div>
+            <div id="lcg-seq" class="flex flex-wrap gap-1.5 font-mono text-xs"></div>
+
+            <div class="w-full h-56 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-2">
+              <canvas id="lcg-canvas" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modern generátorok és véletlenszerűség ellenőrzése -->
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Modern generátorok és NumPy</h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-disc pl-5">
+              <li><strong>Mersenne Twister:</strong> klasszikus, általános célú PRNG (hosszú periódus).</li>
+              <li><strong>PCG (Permuted Congruential Generator):</strong> kiváló statisztikai tulajdonságok, gyors.</li>
+              <li><strong>NumPy ajánlás:</strong> új kódokhoz a <code>np.random.default_rng(seed)</code> használata javasolt.</li>
+              <li><strong>Kriptográfia:</strong> külön CSPRNG szükséges (pl. Python <code>secrets</code> modul).</li>
+            </ul>
+            <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mt-3">
+              <div class="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
+                <span>NumPy default_rng()</span>
+                <button onclick="copyCode(this)" class="px-2 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">Másolás</button>
+              </div>
+              <pre class="p-3 bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto"><code>import numpy as np
+rng = np.random.default_rng(2026)
+u = rng.random(5)
+z = rng.normal(0, 1, size=5)</code></pre>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Véletlenszerűség ellenőrzése</h3>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-300 list-disc pl-5">
+              <li><strong>Hisztogram:</strong> a generált eloszlás alakjának vizuális ellenőrzése.</li>
+              <li><strong>Átlag és szórás:</strong> alapstatisztikák egyezése az elméleti értékekkel.</li>
+              <li><strong>Autokorreláció:</strong> egymást követő értékek közötti lineáris kapcsolat vizsgálata.</li>
+              <li><strong>2D minták $(u_i, u_{i+1})$:</strong> egymást követő értékpárok pontdiagramja. Látható mintázatok, rácsok gyenge generátorra utalnak; jó generátornál nincs szabályosság.</li>
+            </ul>
+            <p class="text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              <strong>Fontos elv:</strong> A statisztikai tesztek csak a gyenge generátorokat szűrik ki, de sosem <em>bizonyítják</em> a tökéletes véletlenséget.
+            </p>
+          </div>
+        </div>
+
+        <!-- Eloszlások előállítása és Inverz transzformáció -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Eloszlások előállítása és Inverz transzformáció</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Normális eloszlás: $X \sim N(\mu, \sigma^2)$</div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">Paraméterei: $\mu$ (átlag / várható érték) és $\sigma$ (szórás). A görbe szimmetrikus $\mu$-re, a mérési hibák és középérték körüli jelenségek alapmodellje.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Exponenciális eloszlás</div>
+              <p class="text-sm text-slate-600 dark:text-slate-300">Várakozási idők és eseményközök (pl. ügyfelek érkezése) modellje. $\lambda$ a ráta, az átlagos várakozási idő $1/\lambda$. Eloszlásfüggvénye: $F(t) = 1 - e^{-\lambda t}$ ($t \ge 0$).</p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/50 space-y-3">
+            <h4 class="font-bold text-teal-900 dark:text-teal-300">Inverz transzformáció módszere</h4>
+            <p class="text-sm text-teal-900/90 dark:text-teal-200/90">
+              1. Generáljunk $U \sim \text{Uniform}(0,1)$ értéket. &nbsp; 2. Alkalmazzuk a cél-eloszlás $F^{-1}$ inverz eloszlásfüggvényét. Exponenciális eloszlásnál az $F(T) = 1 - e^{-\lambda T} = U$ egyenletből:
+            </p>
+            <div class="text-center py-1 text-teal-950 dark:text-teal-100">
+              $$T = -\frac{\ln(1 - U)}{\lambda}$$
+            </div>
+            <div class="rounded-xl overflow-hidden border border-teal-200 dark:border-teal-800">
+              <div class="bg-teal-100/70 dark:bg-slate-800 px-3 py-1.5 flex items-center justify-between text-xs font-semibold text-teal-900 dark:text-slate-300">
+                <span>Python – Inverz transzformáció exponenciális eloszláshoz</span>
+                <button onclick="copyCode(this)" class="px-2 py-0.5 rounded bg-white dark:bg-slate-700 border border-teal-300 dark:border-slate-600">Másolás</button>
+              </div>
+              <pre class="p-3 bg-slate-900 text-slate-100 text-xs sm:text-sm font-mono overflow-x-auto"><code>import numpy as np
+rng = np.random.default_rng(2026)
+lam = 0.5
+u = rng.random(10000)
+t = -np.log1p(-u) / lam
+print("Átlag:", t.mean())  # elméleti: 1 / 0.5 = 2.0</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monte Carlo-módszer + Interaktív Pi Szimulátor -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">A Monte Carlo-módszer</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
+              Véletlen minták sokaságából statisztikai úton becslünk egy ismeretlen mennyiséget. A <strong>4 alaplépés</strong>:
+            </p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700"><span class="font-bold text-brand-600 dark:text-brand-400">1.</span> Kérdés megfogalmazása</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700"><span class="font-bold text-brand-600 dark:text-brand-400">2.</span> Véletlen mintavételi modell</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700"><span class="font-bold text-brand-600 dark:text-brand-400">3.</span> $N$ kísérlet futtatása</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700"><span class="font-bold text-brand-600 dark:text-brand-400">4.</span> Átlagolás és hibaértékelés</div>
+            </div>
+          </div>
+
+          <!-- Pi becslés elmélet -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-sm">
+            <div class="font-bold text-slate-900 dark:text-white">Klasszikus példa: $\pi$ becslése negyedkörrel</div>
+            <p class="text-slate-600 dark:text-slate-300">
+              Az $[0,1] \times [0,1]$ egységnégyzet területe $1$, a beleírt egységsugarú negyedkör területe $\pi/4$. Egyenletesen szórt pontok esetén $P(X^2 + Y^2 \le 1) = \pi/4$, innen:
+            </p>
+            <div class="text-center py-1">$$\pi \approx 4 \cdot \frac{N_{\text{bent}}}{N_{\text{összes}}}$$</div>
+          </div>
+
+          <!-- INTERAKTÍV MONTE CARLO PI SZIMULÁTOR -->
+          <div class="rounded-2xl border-2 border-teal-200 dark:border-teal-900/60 bg-teal-50/30 dark:bg-slate-950/60 p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h4 class="font-bold text-teal-700 dark:text-teal-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                Interaktív Monte Carlo $\pi$-szimulátor
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="runMonteCarloPi(100)" class="mc-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 transition">N = 100</button>
+                <button onclick="runMonteCarloPi(1000)" class="mc-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-600 text-white border border-teal-600 transition">N = 1 000</button>
+                <button onclick="runMonteCarloPi(5000)" class="mc-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 transition">N = 5 000</button>
+                <button onclick="runMonteCarloPi(20000)" class="mc-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-teal-600 hover:text-white hover:border-teal-600 transition">N = 20 000</button>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-12 gap-5 items-center">
+              <div class="md:col-span-6 flex justify-center">
+                <div class="w-full max-w-[320px] aspect-square bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-2 shadow-inner">
+                  <canvas id="mc-pi-canvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+              <div class="md:col-span-6 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Becsült $\hat{\pi}$</div>
+                    <div id="mc-est" class="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">—</div>
+                  </div>
+                  <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Pontos eltérés $|\hat{\pi} - \pi|$</div>
+                    <div id="mc-err" class="text-2xl font-extrabold font-mono text-rose-600 dark:text-rose-400">—</div>
+                  </div>
+                  <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Bent / Összes</div>
+                    <div id="mc-ratio" class="text-base font-bold font-mono text-slate-800 dark:text-slate-200">—</div>
+                  </div>
+                  <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Hibarend ($1/\sqrt{N}$)</div>
+                    <div id="mc-order" class="text-base font-bold font-mono text-brand-600 dark:text-brand-400">—</div>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Valódi érték: $\pi \approx 3.141593$. Próbáld meg többször futtatni kis ($N=100$) és nagy ($N=20000$) mintán, és figyeld az ingadozás csökkenését!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Konvergencia, Integrálás, Konfidenciaintervallum, Alkalmazások -->
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Konvergencia és becslési hiba</div>
+              <p class="text-slate-600 dark:text-slate-300">
+                A Monte Carlo-becslés standard hibája: $$\text{Standard hiba} \propto \frac{1}{\sqrt{N}}$$
+                Ez lassú konvergenciát jelent: <strong>10-szer pontosabb becsléshez kb. 100-szoros mintaszám</strong> szükséges!
+              </p>
+              <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-slate-900 dark:text-white">95%-os konfidenciaintervallum</div>
+                <p class="text-slate-600 dark:text-slate-300">Nagy mintánál a minta $s$ szórásával: $$\text{becslés} \pm 1{,}96 \cdot \frac{s}{\sqrt{N}}$$</p>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Monte Carlo-integrálás</div>
+              <p class="text-slate-600 dark:text-slate-300">
+                Egy integrál a függvény véletlen pontokban vett átlagértékével becsülhető:
+                $$\int_0^1 f(x)\,dx \approx \frac{1}{N} \sum_{i=1}^N f(U_i)$$
+                Például $f(x)=x^2$ a $[0,1]$-en: pontos érték $1/3 \approx 0{,}3333$.
+              </p>
+            </div>
+          </div>
+
+          <!-- További alkalmazások & Előnyök/Korlátok -->
+          <div class="grid md:grid-cols-3 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-2">További alkalmazások</div>
+              <ul class="space-y-1 text-slate-600 dark:text-slate-300 list-disc pl-4">
+                <li><strong>Sorbanállás:</strong> átlagos várakozás, max. sorhossz mérése.</li>
+                <li><strong>Megbízhatóság:</strong> gépalkatrészek meghibásodási kockázata.</li>
+                <li><strong>Random search:</strong> véletlen pontok kipróbálása optimalizálásban (pl. $y=(x-1{,}5)^2+2$, <code>np.argmin(y)</code>).</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50">
+              <div class="font-bold text-emerald-800 dark:text-emerald-300 mb-2">Monte Carlo előnyei</div>
+              <ul class="space-y-1 text-emerald-900/80 dark:text-emerald-200/80 list-disc pl-4">
+                <li>Egyszerű, könnyen implementálható algoritmus.</li>
+                <li>Sokdimenziós feladatokra is jól használható.</li>
+                <li>Könnyen párhuzamosítható.</li>
+                <li>A bizonytalanság statisztikailag mérhető.</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-2">Monte Carlo korlátai</div>
+              <ul class="space-y-1 text-slate-600 dark:text-slate-300 list-disc pl-4">
+                <li>Lassú konvergencia ($1/\sqrt{N}$).</li>
+                <li>Nagy pontossághoz sok minta kell.</li>
+                <li>Rossz modell $\rightarrow$ rossz becslés.</li>
+                <li>A PRNG minősége és seed kezelése kritikus.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Gyakori programozási hibák figyelmeztető kártya -->
+          <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-l-4 border-rose-500 text-rose-950 dark:text-rose-200">
+            <h4 class="font-bold text-rose-700 dark:text-rose-400 mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Gyakori programozási hibák (Vizsgán is fontos!)
+            </h4>
+            <ul class="grid sm:grid-cols-2 gap-2 text-sm list-disc pl-5">
+              <li>A <strong>seed ismételt beállítása</strong> minden cikluslépésben (így mindig ugyanazt a számot kapjuk!).</li>
+              <li>Túl kevés minta alapján levont, túl erős statisztikai következtetés.</li>
+              <li>A mintaeloszlás és a valódi célmodell összekeverése.</li>
+              <li>Nem kriptográfiai (egyszerű) PRNG használata biztonsági célra.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 2. MODUL: DISZKRÉT MODELLEK ÉS NEMLINEÁRIS DINAMIKA                   -->
+      <!-- ===================================================================== -->
+      <section id="tab-mod2" class="tab-panel hidden space-y-8">
+        <!-- Fejléc -->
+        <div class="rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-700 text-white p-6 sm:p-8 shadow-lg shadow-purple-600/15">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase mb-3">
+            2. Modul • ModSim BSc 09
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Diszkrét modellek és nemlineáris dinamika</h2>
+          <p class="text-purple-100 text-sm sm:text-base max-w-2xl">
+            Exponenciális és logisztikus növekedés, fixpontok stabilitása, pókhálódiagram (cobweb), perióduskettőződés és a Feigenbaum-féle bifurkációs diagram.
+          </p>
+        </div>
+
+        <!-- Diszkrét dinamikai rendszer & Exponenciális növekedés -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Diszkrét dinamikai rendszerek és exponenciális modell</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              Az állapotváltozás egész időlépésekben történik egy iterációs szabály mentén: $$x_{n+1} = f(x_n; \theta)$$
+              Az átmenet lehet determinisztikus vagy sztochasztikus, a folyamatot a kezdeti feltétel ($x_0$) és az iteráció határozza meg.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-bold text-slate-900 dark:text-white">Diszkrét exponenciális növekedés</span>
+              <span class="font-mono text-sm px-3 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200">$x_{n+1} = a x_n \iff x_n = x_0 a^n$</span>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              Példa: $a = 1{,}20$ (lépésenként 20% növekedés), $x_0 = 100 \implies x_3 = 100 \cdot 1{,}2^3 = \mathbf{172{,}8}$.
+            </p>
+            <div class="grid sm:grid-cols-3 gap-3 text-sm pt-1">
+              <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-emerald-600 dark:text-emerald-400">$a &gt; 1$: Növekedés</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Gyorsulva nő. A $x^*=0$ fixpont taszító (instabil).</p>
+              </div>
+              <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-slate-600 dark:text-slate-300">$a = 1$: Állandó</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Minden $x$ érték fixpont (határeset).</p>
+              </div>
+              <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-amber-600 dark:text-amber-400">$0 &lt; a &lt; 1$: Csökkenés</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Nullához tart, pozitív marad. $x^*=0$ vonzó (stabil).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-sm text-slate-600 dark:text-slate-300 flex flex-wrap gap-2">
+            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">📱 Digitális szolgáltatás korai terjedése</span>
+            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">💰 Kamatos kamat (pl. évi 5%: $\times 1{,}05$)</span>
+            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">🦠 Mikroorganizmusok bőséges tápanyaggal</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            <strong>Korlát:</strong> A valóságban véges erőforrások, telítődés és verseny miatt semmi nem nőhet korlátlanul – ekkor reálisabb a <em>logisztikus modell</em>.
+          </p>
+        </div>
+
+        <!-- Diszkrét logisztikus modell és stabilitás -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">A diszkrét logisztikus modell és stabilitása</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              Korlátozott erőforrások melletti növekedés (pl. növények kertben, halállomány tóban, app terjedése), ahol $x_n \in [0,1]$ a maximális kapacitáshoz viszonyított normalizált populáció, $(1 - x_n)$ pedig a telítődési/versengési tag:
+            </p>
+            <div class="my-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 text-center">
+              $$x_{n+1} = r x_n (1 - x_n) \qquad (0 \le r \le 4 \text{ esetén } [0,1] \text{ invariáns})$$
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Fixpontok ($x^* = f(x^*)$)</div>
+              <p class="text-slate-600 dark:text-slate-300">Geometriailag az $y = f(x)$ parabola és az $y = x$ egyenes metszéspontjai:</p>
+              <div class="py-1">$$x_1^* = 0, \qquad x_2^* = 1 - \frac{1}{r}$$</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Ha a rendszer ide jut, ott is marad.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Lokális stabilitás (Derivált kritérium)</div>
+              <p class="text-slate-600 dark:text-slate-300">Kis $\epsilon_n$ eltérésre $\epsilon_{n+1} \approx f'(x^*) \epsilon_n$:</p>
+              <ul class="space-y-1 text-slate-600 dark:text-slate-300 list-disc pl-4">
+                <li>$|f'(x^*)| &lt; 1$: <strong>lokálisan aszimptotikusan stabil (vonzó)</strong></li>
+                <li>$|f'(x^*)| &gt; 1$: <strong>instabil (taszító)</strong></li>
+                <li>$|f'(x^*)| = 1$: <strong>határeset</strong> (további elemzés kell)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 text-sm space-y-1.5">
+            <div class="font-bold text-purple-900 dark:text-purple-300">Stabilitási tartományok a logisztikus modellben</div>
+            <p class="text-purple-950/90 dark:text-purple-200/90">
+              Mivel $f'(x) = r(1 - 2x)$:
+            </p>
+            <ul class="list-disc pl-5 text-purple-950/90 dark:text-purple-200/90 space-y-1">
+              <li>$x_1^* = 0$-ban: $f'(0) = r \implies$ stabil, ha $|r| &lt; 1$.</li>
+              <li>$x_2^* = 1 - 1/r$-ben: $f'(1 - 1/r) = 2 - r \implies |2 - r| &lt; 1 \iff \mathbf{1 &lt; r &lt; 3}$ (pozitív fixpont stabil).</li>
+              <li><strong>$r = 3$ esetén:</strong> $f'(x_2^*) = -1$ – itt következik be az <strong>első perióduskettőződés</strong>!</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Pókhálódiagram + Interaktív Logisztikus & Cobweb Szimulátor -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Pókhálódiagram (Cobweb) és Idősor</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+              A pókhálódiagram vizuálisan mutatja a pálya konvergenciáját, oszcillációját vagy káoszát. <strong>5 lépése:</strong>
+              (1) Felrajzoljuk $y=f(x)$-et és $y=x$-et; (2) Indulunk $x_0$-ból; (3) Függőlegesen lépünk a görbéig $(x_0, f(x_0))$; (4) Vízszintesen lépünk az $y=x$ egyenesig; (5) Ismételjük.
+            </p>
+            <div class="text-xs sm:text-sm p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+              <strong>Kézi példa ($r=2{,}5, x_0=0{,}2$):</strong> $x_1 = 2{,}5(0{,}2)(0{,}8) = 0{,}4 \rightarrow x_2 = 2{,}5(0{,}4)(0{,}6) = 0{,}6 \rightarrow x_3 = 0{,}6$ (stabil fixpont). Ezzel szemben $r=3{,}2$-nél a nemnulla fixpont instabil, és stabil 2-es ciklus alakul ki.
+            </div>
+          </div>
+
+          <!-- INTERAKTÍV LOGISZTIKUS & PÓKHÁLÓDIAGRAM SZIMULÁTOR -->
+          <div class="rounded-2xl border-2 border-purple-200 dark:border-purple-900/60 bg-purple-50/30 dark:bg-slate-950/60 p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="font-bold text-purple-700 dark:text-purple-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse"></span>
+                Interaktív Logisztikus &amp; Pókhálódiagram Szimulátor
+              </h4>
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="setLogisticPreset(2.5, 0.2)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-500 transition">r=2.5 (Fixpont)</button>
+                <button onclick="setLogisticPreset(3.2, 0.2)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-500 transition">r=3.2 (2-es ciklus)</button>
+                <button onclick="setLogisticPreset(3.5, 0.2)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-500 transition">r=3.5 (4-es ciklus)</button>
+                <button onclick="setLogisticPreset(3.8, 0.2)" class="text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-purple-500 transition">r=3.8 (Káosz)</button>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                  <span class="text-slate-600 dark:text-slate-400">Növekedési paraméter ($r$)</span>
+                  <span id="log-r-val" class="font-mono text-purple-700 dark:text-purple-300">2.50</span>
+                </div>
+                <input id="log-r" type="range" min="0.5" max="4.0" step="0.01" value="2.5" class="w-full accent-purple-600" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                  <span class="text-slate-600 dark:text-slate-400">Kezdeti populáció ($x_0$)</span>
+                  <span id="log-x0-val" class="font-mono text-purple-700 dark:text-purple-300">0.20</span>
+                </div>
+                <input id="log-x0" type="range" min="0.05" max="0.95" step="0.01" value="0.2" class="w-full accent-purple-600" />
+              </div>
+            </div>
+
+            <!-- Dinamikai mutatók -->
+            <div id="log-info" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm"></div>
+
+            <!-- Két Canvas egymás mellett -->
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-2">
+                <div class="text-xs font-semibold text-center text-slate-500 dark:text-slate-400 mb-1">Pókhálódiagram (Cobweb)</div>
+                <div class="w-full aspect-square max-h-72 mx-auto">
+                  <canvas id="cobweb-canvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-2">
+                <div class="text-xs font-semibold text-center text-slate-500 dark:text-slate-400 mb-1">Idősor ($x_n$ az első 50 lépésben)</div>
+                <div class="w-full aspect-square max-h-72 mx-auto">
+                  <canvas id="timeseries-canvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Periodikus pályák, Perióduskettőződés és Feigenbaum-diagram -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Periodikus pályák, Perióduskettőződés és Feigenbaum-diagram</h3>
+
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Periodikus pálya és 2-es ciklus</div>
+              <p class="text-slate-600 dark:text-slate-300">
+                $p$-periódusú pálya: $f^p(x_0) = x_0$ (a legkisebb ilyen pozitív $p$ az alapperiódus). A 2-es ciklus pontjai az $f(f(x)) = x$ egyenletből (a fixpontok kizárásával, $r &gt; 3$ esetén):
+              </p>
+              <div class="py-1">$$x_{1,2} = \frac{r + 1 \pm \sqrt{(r - 3)(r + 1)}}{2r}$$</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Feigenbaum-állandó és univerzalitás</div>
+              <p class="text-slate-600 dark:text-slate-300">
+                A perióduskettőződési kaszkád ($1 \to 2 \to 4 \to 8 \to 16 \dots$) egyre sűrűsödik, és az $r_\infty \approx \mathbf{3{,}56994567}$ felhalmozódási pontnál káoszba torkollik. Az egymást követő elágazások távolságának aránya univerzális állandóhoz tart:
+              </p>
+              <div class="py-1">$$\delta = \lim_{n\to\infty} \frac{r_n - r_{n-1}}{r_{n+1} - r_n} \approx 4{,}669201609$$</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-sm space-y-2">
+            <div class="font-bold text-slate-900 dark:text-white">A Feigenbaum-diagram olvasása és numerikus algoritmusa</div>
+            <p class="text-slate-600 dark:text-slate-300">
+              Vízszintes tengely: $r$ paraméter; függőleges tengely: a <strong>tranziens</strong> (kezdeti beállási) iterációk eldobása után megmaradó hosszú távú $x$ értékek (pl. 1100 iterációból az első 850 eldobása, utolsó 250 kirajzolása). 1 ág = stabil fixpont, 2 ág = 2-es ciklus, 4/8 ág = perióduskettőződés, sűrű pontfelhő = káosz (benne fehér <em>periodikus ablakokkal</em>, pl. 3-as ciklus $r \approx 3{,}83$-nál).
+            </p>
+          </div>
+
+          <!-- INTERAKTÍV FEIGENBAUM-DIAGRAM -->
+          <div class="rounded-2xl border-2 border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/30 dark:bg-slate-950/60 p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                Interaktív Feigenbaum-féle bifurkációs diagram ($r \in [2{,}5;\ 4{,}0]$)
+              </h4>
+              <div id="feig-readout" class="text-xs sm:text-sm font-mono px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
+                Mozgasd az egeret a diagram fölött!
+              </div>
+            </div>
+            <div class="w-full h-72 sm:h-80 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-2 relative">
+              <canvas id="feigenbaum-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+            </div>
+            <div class="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 inline-block"></span> $r = 3{,}00$ (1. perióduskettőződés)</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-rose-500 inline-block"></span> $r_\infty \approx 3{,}5699$ (Káosz kezdete)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 3. MODUL: MARKOV-LÁNCOK ÉS MONTE CARLO MÓDSZER                        -->
+      <!-- ===================================================================== -->
+      <section id="tab-mod3" class="tab-panel hidden space-y-8">
+        <!-- Fejléc -->
+        <div class="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white p-6 sm:p-8 shadow-lg shadow-teal-600/15">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase mb-3">
+            3. Modul • ModSim BSc 10
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Markov-láncok és Monte Carlo módszer</h2>
+          <p class="text-teal-100 text-sm sm:text-base max-w-2xl">
+            Állapotterek, átmeneti valószínűségi mátrixok, több lépéses előrejelzés, stacionárius eloszlás és validálás Monte Carlo szimulációval (webáruház esettanulmány és 5 Python feladat).
+          </p>
+        </div>
+
+        <!-- Alapfogalmak és képletek -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Alapfogalmak és matematikai modell</h3>
+          <div class="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/50 text-sm text-teal-950 dark:text-teal-200">
+            <strong>Markov-tulajdonság („emlékezetmentesség”):</strong> A rendszer következő állapota <em>kizárólag az aktuális állapottól</em> függ, a korábbi múltbeli útvonaltól nem.
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Állapottér ($S$) és Átmeneti mátrix ($P$)</div>
+              <ul class="space-y-1.5 text-slate-600 dark:text-slate-300 list-disc pl-4">
+                <li>Webshop példa: $S = \{K, T, M, R, V\}$ (Kezdőlap, Termékkeresés, Termékmegtekintés, Kosár, Vásárlás lezárása).</li>
+                <li>Szerver/rendszer példa: $S = \{\text{Normál, Terhelt, Lassú, Hibás, Leállt}\}$.</li>
+                <li>$P = [P_{ij}]$, ahol $P_{ij} \ge 0$, sorok = jelenlegi, oszlopok = következő állapot.</li>
+                <li><strong>Sorösszeg tulajdonság:</strong> Minden sor összege pontosan 1: $$\sum_j P_{ij} = 1$$</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="font-bold text-slate-900 dark:text-white">Időbeli alakulás és Stacionárius eloszlás</div>
+              <ul class="space-y-1.5 text-slate-600 dark:text-slate-300 list-disc pl-4">
+                <li>1 lépés: $\pi^{(t+1)} = \pi^{(t)} P$</li>
+                <li>$k$ lépés: $\pi^{(t+k)} = \pi^{(t)} P^k$ ($P^k$ mátrix $(i,j)$ eleme az $i$-ből $j$-be jutás valószínűsége pontosan $k$ lépésben).</li>
+                <li><strong>Stacionárius eloszlás:</strong> $\pi^* = \pi^* P$ és $\sum_i \pi_i^* = 1$.</li>
+                <li><em>Fontos:</em> A stacionárius eloszlás nem jelenti azt, hogy egy látogató megáll egy állapotban – az egyed tovább mozog, de a populáció arányai hosszú távon állandósulnak!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Webáruház 5 állapotú esettanulmány -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Webáruház esettanulmány (5 állapot)</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              Minden állapotból minden állapotba van pozitív átmenet ($P_{ij} &gt; 0$), így a lánc ergodikus és egyértelmű stacionárius eloszláshoz tart.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-center border-collapse">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700 text-left">Honnan \ Hová</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700">K (Kezdőlap)</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700">T (Keresés)</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700">M (Megtekintés)</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700">R (Kosár)</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700">V (Vásárlás)</th>
+                  <th class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40">$\sum$</th>
+                </tr>
+              </thead>
+              <tbody class="font-mono text-slate-700 dark:text-slate-300">
+                <tr><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-semibold text-left">K (Kezdőlap)</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,30</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-teal-600 dark:text-teal-400">0,35</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,20</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,05</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40 font-bold">1,00</td></tr>
+                <tr><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-semibold text-left">T (Keresés)</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,15</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-teal-600 dark:text-teal-400">0,40</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,30</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,05</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40 font-bold">1,00</td></tr>
+                <tr><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-semibold text-left">M (Megtekintés)</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,20</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-teal-600 dark:text-teal-400">0,50</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,15</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,05</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40 font-bold">1,00</td></tr>
+                <tr><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-semibold text-left">R (Kosár)</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,05</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,20</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-teal-600 dark:text-teal-400">0,50</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,15</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40 font-bold">1,00</td></tr>
+                <tr><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-semibold text-left">V (Vásárlás)</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-teal-600 dark:text-teal-400">0,40</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,10</td><td class="p-2.5 border border-slate-200 dark:border-slate-700">0,30</td><td class="p-2.5 border border-slate-200 dark:border-slate-700 bg-teal-50 dark:bg-teal-950/40 font-bold">1,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-sm">
+            <div class="font-bold text-slate-900 dark:text-white mb-2">Stacionárius eloszlás ($\pi = \pi P$) értelmezése</div>
+            <p class="text-slate-600 dark:text-slate-300">
+              A tananyag szerinti hosszú távú megoszlás: <strong>K: 0,163</strong> • <strong>T: 0,245</strong> • <strong>M: 0,308</strong> • <strong>R: 0,192</strong> • <strong>V: 0,092</strong>.
+              Hosszú távon a látogatók a legtöbb időt a <strong>termékmegtekintés (M, ~30,8%)</strong> állapotban, míg a legkevesebbet a <strong>vásárlás lezárása (V, ~9,2%)</strong> állapotban töltik.
+            </p>
+          </div>
+        </div>
+
+        <!-- INTERAKTÍV WEBSHOP MARKOV-LÁNC SZIMULÁTOR -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-emerald-200 dark:border-emerald-900/60 shadow-sm space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-xl font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Interaktív Webshop Markov-lánc Szimulátor
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Algoritmus: Kezdőállapot $\rightarrow$ $u \sim U(0,1)$ $\rightarrow$ kumulatív sorvalószínűségek alapján lépés $\rightarrow$ $T$ lépés $\times$ $N$ független pálya.
+              </p>
+            </div>
+          </div>
+
+          <!-- Vezérlők -->
+          <div class="grid sm:grid-cols-3 gap-4">
+            <label class="block">
+              <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Kezdőállapot</span>
+              <select id="mk-start" class="mt-1 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="0" selected>K – Kezdőlap</option>
+                <option value="1">T – Termékkeresés</option>
+                <option value="2">M – Termékmegtekintés</option>
+                <option value="3">R – Kosár</option>
+                <option value="4">V – Vásárlás lezárása</option>
+              </select>
+            </label>
+
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-600 dark:text-slate-400">Lépésszám ($T$)</span>
+                <span id="mk-t-val" class="font-mono text-emerald-600 dark:text-emerald-400">10</span>
+              </div>
+              <input id="mk-t" type="range" min="1" max="50" value="10" class="w-full accent-emerald-600 mt-2" />
+            </div>
+
+            <label class="block">
+              <span class="text-xs font-semibold text-slate-600 dark:text-slate-400">Monte Carlo pályák ($N$)</span>
+              <select id="mk-n" class="mt-1 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="100">N = 100</option>
+                <option value="1000" selected>N = 1 000</option>
+                <option value="10000">N = 10 000</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="runMarkovSimulation()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition">
+              Szimuláció futtatása
+            </button>
+            <button onclick="playSingleMarkovPath()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold border border-slate-300 dark:border-slate-700 transition">
+              1 db 15 lépéses véletlen útvonal lejátszása
+            </button>
+            <div id="mk-max-err" class="text-xs sm:text-sm font-mono text-slate-600 dark:text-slate-300 ml-auto"></div>
+          </div>
+
+          <!-- Oszlopdiagram Canvas -->
+          <div class="w-full h-64 sm:h-72 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 p-2">
+            <canvas id="markov-canvas" class="w-full h-full block"></canvas>
+          </div>
+          <div class="flex flex-wrap gap-4 justify-center text-xs text-slate-600 dark:text-slate-400">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500 inline-block"></span> Analitikus ($\pi^{(0)} P^T$)</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500 inline-block"></span> Monte Carlo szimulált</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Stacionárius ($\pi^*$)</span>
+          </div>
+
+          <!-- 15 lépéses véletlen útvonal kijelző -->
+          <div id="mk-path-box" class="hidden p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Véletlen látogatói útvonal (15 lépés)</div>
+            <div id="mk-path-steps" class="flex flex-wrap items-center gap-1.5 text-xs font-mono"></div>
+          </div>
+        </div>
+
+        <!-- 5 gyakorlati Python feladat összefoglalása -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Az 5 gyakorlati Python feladat (BSc_01 – BSc_05)</h3>
+          <div class="space-y-3 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-1">1. feladat (BSc_01.py) – Állapotok és mátrix ellenőrzése</div>
+              <p class="text-slate-600 dark:text-slate-300 mb-2">Az 5 szerverállapot azonosítása és sorösszegek ellenőrzése 1-re.</p>
+              <code class="block p-2.5 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">assert np.allclose(P.sum(axis=1), 1)</code>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-1">2. feladat (BSc_02.py) – Egy- és kétlépéses előrejelzés</div>
+              <p class="text-slate-600 dark:text-slate-300 mb-2">Normál állapotból indulva $\pi_1$ és $\pi_2$ számítása mátrixszorzással.</p>
+              <code class="block p-2.5 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">p0 = np.array([1., 0, 0, 0, 0]); p1 = p0 @ P; p2 = p1 @ P</code>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-1">3. feladat (BSc_03.py) – Egy véletlen Markov-pálya (30 lépés)</div>
+              <p class="text-slate-600 dark:text-slate-300 mb-2">Egyetlen szimulált pálya lépcsős diagrammal (<code>plt.step</code>).</p>
+              <code class="block p-2.5 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">x = rng.choice(5, p=P[x]); history.append(x)</code>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-1">4. feladat (BSc_04.py) – Sok pálya: Monte Carlo vs. Elmélet</div>
+              <p class="text-slate-600 dark:text-slate-300 mb-2">10. lépés gyakoriságai $N=100, 1000, 10000$ mellett, max eltérés mérése.</p>
+              <code class="block p-2.5 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">theory = p0 @ np.linalg.matrix_power(P, 10); freq = np.bincount(x, minlength=5) / n</code>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="font-bold text-slate-900 dark:text-white mb-1">5. feladat (BSc_05.py) – Webáruház 20 lépés és hosszú táv</div>
+              <p class="text-slate-600 dark:text-slate-300 mb-2">A webshop mátrix 20. lépésének összehasonlítása 20 000 MC pályával, oszlopdiagramon.</p>
+              <code class="block p-2.5 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">theory = p0 @ np.linalg.matrix_power(SHOP, 20); sim = np.bincount(x, minlength=5) / len(x)</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 4. FÜL: KÉPLETGYŰJTEMÉNY & PYTHON PUSKÁK                              -->
+      <!-- ===================================================================== -->
+      <section id="tab-cheatsheet" class="tab-panel hidden space-y-8">
+        <div class="rounded-3xl bg-gradient-to-br from-slate-800 via-slate-900 to-brand-900 text-white p-6 sm:p-8 shadow-lg">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase mb-3">
+            Összesített Puska
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Képletgyűjtemény &amp; Python kódok</h2>
+          <p class="text-slate-300 text-sm sm:text-base">Minden fontos vizsgaképlet és futtatható, egy kattintással másolható Python kódrészlet egyetlen helyen.</p>
+        </div>
+
+        <!-- Képletek táblázata -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Összes kulcsképlet</h3>
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="text-xs font-bold uppercase text-brand-600 dark:text-brand-400 mb-1">1. Modul – LCG &amp; Eloszlások</div>
+              <ul class="space-y-2 text-slate-700 dark:text-slate-200">
+                <li>LCG: $x_{n+1} = (a \cdot x_n + c) \bmod m$</li>
+                <li>Exponenciális CDF: $F(t) = 1 - e^{-\lambda t}$ (átlag: $1/\lambda$)</li>
+                <li>Inverz transzformáció: $T = -\ln(1-U)/\lambda$</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="text-xs font-bold uppercase text-brand-600 dark:text-brand-400 mb-1">1. Modul – Monte Carlo</div>
+              <ul class="space-y-2 text-slate-700 dark:text-slate-200">
+                <li>$\pi$-becslés: $\pi \approx 4 \cdot N_{\text{bent}} / N_{\text{összes}}$</li>
+                <li>Integrál: $\int_0^1 f(x)\,dx \approx \frac{1}{N}\sum f(U_i)$</li>
+                <li>Hibarend: $\propto 1/\sqrt{N}$ • 95% CI: $\hat{\mu} \pm 1{,}96 \cdot s/\sqrt{N}$</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="text-xs font-bold uppercase text-purple-600 dark:text-purple-400 mb-1">2. Modul – Diszkrét dinamika</div>
+              <ul class="space-y-2 text-slate-700 dark:text-slate-200">
+                <li>Exponenciális: $x_{n+1}=ax_n \implies x_n = x_0 a^n$</li>
+                <li>Logisztikus: $x_{n+1} = r x_n (1 - x_n)$</li>
+                <li>Fixpontok: $x_1^*=0$, $x_2^*=1-1/r$</li>
+                <li>Stabilitás: $|f'(x^*)| &lt; 1$, itt $f'(x_2^*)=2-r \implies 1 &lt; r &lt; 3$</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <div class="text-xs font-bold uppercase text-purple-600 dark:text-purple-400 mb-1">2. &amp; 3. Modul – Káosz &amp; Markov</div>
+              <ul class="space-y-2 text-slate-700 dark:text-slate-200">
+                <li>2-es ciklus: $x_{1,2} = \frac{r+1 \pm \sqrt{(r-3)(r+1)}}{2r}$</li>
+                <li>Feigenbaum: $\delta \approx 4{,}6692$, $r_\infty \approx 3{,}5699$</li>
+                <li>Markov: $\pi^{(t+k)} = \pi^{(t)} P^k$, $\pi^* = \pi^* P$, $\sum_j P_{ij}=1$</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Másolható Python puskák -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Másolható Python kódminták</h3>
+
+          <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span>1. Monte Carlo π-becslés és integrálás (NumPy)</span>
+              <button onclick="copyCode(this)" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-500 transition">Másolás</button>
+            </div>
+            <pre class="p-4 bg-slate-900 text-slate-100 text-xs sm:text-sm font-mono overflow-x-auto"><code>import numpy as np
+rng = np.random.default_rng(2026)
+N = 100_000
+
+# Pi becslése
+x = rng.random(N)
+y = rng.random(N)
+pi_becsles = 4 * np.mean(x*x + y*y <= 1)
+print("Pi becslés:", pi_becsles)
+
+# Integrálás: integral_0^1 x^2 dx = 1/3
+u = rng.random(N)
+print("Integrál becslés:", np.mean(u**2), "Pontos:", 1/3)
+
+# Random search optimalizálás: min (x - 1.5)^2 + 2
+xs = rng.uniform(-5, 5, size=10000)
+ys = (xs - 1.5)**2 + 2
+i = np.argmin(ys)
+print("x* ≈", xs[i], "f* ≈", ys[i])</code></pre>
+          </div>
+
+          <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span>2. Feigenbaum-féle bifurkációs diagram (Matplotlib)</span>
+              <button onclick="copyCode(this)" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-500 transition">Másolás</button>
+            </div>
+            <pre class="p-4 bg-slate-900 text-slate-100 text-xs sm:text-sm font-mono overflow-x-auto"><code>import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.linspace(2.5, 4.0, 1900)
+x = np.full_like(r, 0.2)
+
+for n in range(1100):
+    x = r * x * (1 - x)
+    if n >= 850:  # tranziens elhagyása
+        plt.plot(r, x, ",k", alpha=0.15)
+
+plt.xlabel("r"); plt.ylabel("x")
+plt.show()</code></pre>
+          </div>
+
+          <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div class="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span>3. Markov-lánc analitikus vs. Monte Carlo (Webáruház)</span>
+              <button onclick="copyCode(this)" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-brand-500 transition">Másolás</button>
+            </div>
+            <pre class="p-4 bg-slate-900 text-slate-100 text-xs sm:text-sm font-mono overflow-x-auto"><code>import numpy as np
+rng = np.random.default_rng(2026)
+
+SHOP = np.array([
+    [0.30, 0.35, 0.20, 0.10, 0.05],
+    [0.15, 0.40, 0.30, 0.10, 0.05],
+    [0.10, 0.20, 0.50, 0.15, 0.05],
+    [0.05, 0.10, 0.20, 0.50, 0.15],
+    [0.40, 0.10, 0.10, 0.10, 0.30]
+])
+assert np.allclose(SHOP.sum(axis=1), 1)
+
+p0 = np.array([1.0, 0, 0, 0, 0])
+theory = p0 @ np.linalg.matrix_power(SHOP, 20)
+
+# Monte Carlo: 20 000 pálya, 20 lépés
+N, T = 20000, 20
+end_states = np.zeros(N, dtype=int)
+for i in range(N):
+    s = 0
+    for _ in range(T):
+        s = rng.choice(5, p=SHOP[s])
+    end_states[i] = s
+
+sim = np.bincount(end_states, minlength=5) / N
+print("Elméleti:", np.round(theory, 4))
+print("Szimulált:", np.round(sim, 4))</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 5. FÜL: ÖNELLENŐRZÉS & VIZSGAKVÍZ                                     -->
+      <!-- ===================================================================== -->
+      <section id="tab-quiz" class="tab-panel hidden space-y-8">
+        <div class="rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white p-6 sm:p-8 shadow-lg">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide uppercase mb-3">
+            Vizsgafelkészülés
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Önellenőrző kérdések &amp; Vizsgakvíz</h2>
+          <p class="text-amber-100 text-sm sm:text-base">A 3 tananyag összes elméleti ellenőrző kérdése részletes kidolgozással, valamint egy 12 kérdéses interaktív teszt.</p>
+        </div>
+
+        <!-- Lenyitható ellenőrző kérdések (Accordion) -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">A 3 modul összes ellenőrző kérdése (kattints a válaszhoz)</h3>
+          <div id="accordion-container" class="space-y-2.5"></div>
+        </div>
+
+        <!-- 12 kérdéses interaktív feleletválasztós kvíz -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Interaktív Vizsgakvíz (12 kérdés)</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">4–4 kérdés mindhárom modulból, azonnali magyarázattal.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="px-4 py-2 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-bold text-sm">
+                Pontszám: <span id="quiz-score">0</span> / 12
+              </div>
+              <button onclick="resetQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-semibold transition">
+                Újrakezdés
+              </button>
+            </div>
+          </div>
+
+          <div id="quiz-container" class="space-y-6"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: NAVIGÁCIÓ, TÉMA, SZIMULÁTOROK, KVÍZ ÉS KATEX                  -->
+  <!-- ========================================================================= -->
+  <script>
+    // =========================================================================
+    // 1. TÉMA (VILÁGOS / SÖTÉT MÓD) ÉS MOBIL MENÜ
+    // =========================================================================
+    const htmlEl = document.documentElement;
+    function toggleTheme() {
+      htmlEl.classList.toggle('dark');
+      localStorage.setItem('modsim-theme', htmlEl.classList.contains('dark') ? 'dark' : 'light');
+      redrawActiveTabCanvases();
+    }
+    if (localStorage.getItem('modsim-theme') === 'dark' ||
+        (!localStorage.getItem('modsim-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlEl.classList.add('dark');
+    }
+    document.getElementById('theme-toggle-desktop').addEventListener('click', toggleTheme);
+    document.getElementById('theme-toggle-mobile').addEventListener('click', toggleTheme);
+
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobile-overlay');
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    }
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+    document.getElementById('mobile-menu-btn').addEventListener('click', openSidebar);
+    document.getElementById('close-sidebar-btn').addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // Olvasási haladásjelző
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    });
+
+    // =========================================================================
+    // 2. FÜLVÁLTÁS ÉS KATEX RENDERELÉS
+    // =========================================================================
+    let activeTab = 'mod1';
+    const navBtns = document.querySelectorAll('.nav-btn');
+
+    function renderAllMath(root = document.body) {
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(root, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      navBtns.forEach(btn => {
+        const isCurrent = btn.dataset.tab === tabId;
+        btn.classList.toggle('bg-brand-50', isCurrent);
+        btn.classList.toggle('dark:bg-brand-900/30', isCurrent);
+        btn.classList.toggle('text-brand-700', isCurrent);
+        btn.classList.toggle('dark:text-brand-300', isCurrent);
+        btn.classList.toggle('font-semibold', isCurrent);
+        btn.classList.toggle('text-slate-600', !isCurrent);
+        btn.classList.toggle('dark:text-slate-300', !isCurrent);
+      });
+
+      closeSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Canvasok újrarajzolása látható méretre és KaTeX biztosítása
+      requestAnimationFrame(() => {
+        redrawActiveTabCanvases();
+        if (target) renderAllMath(target);
+      });
+    }
+
+    navBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+    // Kódmásolás (iFrame-barát execCommand megoldás)
+    function copyCode(btn) {
+      const pre = btn.closest('div').nextElementSibling;
+      if (!pre) return;
+      const text = pre.innerText;
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        const orig = btn.innerText;
+        btn.innerText = 'Másolva ✓';
+        setTimeout(() => btn.innerText = orig, 1500);
+      } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    // Segédfüggvény HiDPI canvas beállításhoz
+    function setupHiDPICanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return null;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w: rect.width, h: rect.height };
+    }
+
+    function isDark() {
+      return htmlEl.classList.contains('dark');
+    }
+
+    // =========================================================================
+    // 3. INTERAKTÍV LCG SZIMULÁTOR (1. MODUL)
+    // =========================================================================
+    function setLCGPreset(a, c, m, x0) {
+      document.getElementById('lcg-a').value = a;
+      document.getElementById('lcg-c').value = c;
+      document.getElementById('lcg-m').value = m;
+      document.getElementById('lcg-x0').value = x0;
+      updateLCG();
+    }
+
+    function updateLCG() {
+      const a = Math.max(1, parseInt(document.getElementById('lcg-a').value) || 5);
+      const c = Math.max(0, parseInt(document.getElementById('lcg-c').value) || 0);
+      const m = Math.max(2, Math.min(256, parseInt(document.getElementById('lcg-m').value) || 16));
+      let x = ((parseInt(document.getElementById('lcg-x0').value) || 0) % m + m) % m;
+
+      const steps = Math.min(48, Math.max(24, m * 2));
+      const seq = [x];
+      const seen = new Map();
+      seen.set(x, 0);
+      let period = null;
+      let cycleStart = 0;
+
+      for (let i = 1; i <= steps; i++) {
+        x = (a * x + c) % m;
+        if (period === null && seen.has(x)) {
+          cycleStart = seen.get(x);
+          period = i - cycleStart;
+        } else if (period === null) {
+          seen.set(x, i);
+        }
+        seq.push(x);
+      }
+
+      const statsEl = document.getElementById('lcg-stats');
+      statsEl.innerHTML = `
+        <span class="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">Max. lehetséges periódus: <strong>${m}</strong></span>
+        <span class="px-3 py-1 rounded-lg bg-brand-100 dark:bg-brand-900/50 text-brand-800 dark:text-brand-200">Felismert periódus: <strong>${period !== null ? period : '> ' + steps}</strong></span>
+        <span class="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">Állapot (teljes periódus?): <strong>${period === m ? 'Igen ✓' : 'Nem'}</strong></span>
+      `;
+
+      const seqEl = document.getElementById('lcg-seq');
+      seqEl.innerHTML = seq.slice(0, 32).map((val, idx) => {
+        const inFirstCycle = period !== null && idx >= cycleStart && idx < cycleStart + period;
+        const isRepeat = period !== null && idx === cycleStart + period;
+        let cls = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300';
+        if (isRepeat) cls = 'bg-rose-100 dark:bg-rose-900/50 border-rose-400 text-rose-800 dark:text-rose-200 font-bold';
+        else if (inFirstCycle) cls = 'bg-brand-100 dark:bg-brand-900/40 border-brand-300 dark:border-brand-700 text-brand-800 dark:text-brand-200';
+        return `<span class="px-2 py-0.5 rounded-md border ${cls}" title="n=${idx}">${val}</span>`;
+      }).join('');
+
+      drawLCGCanvas(seq, m, period, cycleStart);
+    }
+
+    function drawLCGCanvas(seq, m, period, cycleStart) {
+      const canvas = document.getElementById('lcg-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      ctx.clearRect(0, 0, w, h);
+      const pad = { l: 36, r: 16, t: 16, b: 28 };
+      const pw = w - pad.l - pad.r;
+      const ph = h - pad.t - pad.b;
+
+      // Rács és tengelyek
+      ctx.strokeStyle = dark ? '#334155' : '#e2e8f0';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.t + (ph * i) / 4;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+        const label = Math.round(m - (m * i) / 4);
+        ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(label, pad.l - 6, y + 3);
+      }
+
+      // Lépcsős vonal
+      const nCount = Math.min(seq.length, 40);
+      ctx.strokeStyle = dark ? '#38bdf8' : '#1b66f5';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < nCount; i++) {
+        const px = pad.l + (i / (nCount - 1)) * pw;
+        const py = pad.t + ph - (seq[i] / m) * ph;
+        if (i === 0) ctx.moveTo(px, py);
+        else {
+          const prevY = pad.t + ph - (seq[i - 1] / m) * ph;
+          ctx.lineTo(px, prevY);
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+
+      // Pontok + ismétlődés jelölés
+      for (let i = 0; i < nCount; i++) {
+        const px = pad.l + (i / (nCount - 1)) * pw;
+        const py = pad.t + ph - (seq[i] / m) * ph;
+        ctx.fillStyle = (period !== null && i === cycleStart + period) ? '#f43f5e' : (dark ? '#7dd3fc' : '#1b66f5');
+        ctx.beginPath();
+        ctx.arc(px, py, (period !== null && i === cycleStart + period) ? 4.5 : 2.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Lépés (n)', pad.l + pw / 2, h - 6);
+    }
+
+    ['lcg-a', 'lcg-c', 'lcg-m', 'lcg-x0'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateLCG);
+    });
+
+    // =========================================================================
+    // 4. INTERAKTÍV MONTE CARLO PI SZIMULÁTOR (1. MODUL)
+    // =========================================================================
+    let lastMcN = 1000;
+    let lastMcPoints = [];
+
+    function runMonteCarloPi(N) {
+      lastMcN = N;
+      let inside = 0;
+      const pts = [];
+      const maxDraw = Math.min(N, 6000); // Vizualizáció teljesítmény miatt max 6000 pont rajzolva
+      for (let i = 0; i < N; i++) {
+        const x = Math.random();
+        const y = Math.random();
+        const isIn = (x * x + y * y) <= 1;
+        if (isIn) inside++;
+        if (i < maxDraw) pts.push({ x, y, isIn });
+      }
+      lastMcPoints = pts;
+      const piEst = 4 * (inside / N);
+      const err = Math.abs(piEst - Math.PI);
+      const order = 1 / Math.sqrt(N);
+
+      document.getElementById('mc-est').innerText = piEst.toFixed(5);
+      document.getElementById('mc-err').innerText = err.toFixed(5);
+      document.getElementById('mc-ratio').innerText = `${inside.toLocaleString('hu-HU')} / ${N.toLocaleString('hu-HU')}`;
+      document.getElementById('mc-order').innerText = `≈ ${order.toFixed(4)}`;
+
+      // Gomb aktív állapot
+      document.querySelectorAll('.mc-btn').forEach(b => {
+        const match = b.innerText.replace(/\s/g, '').includes('=' + N);
+        b.classList.toggle('bg-teal-600', match);
+        b.classList.toggle('text-white', match);
+        b.classList.toggle('bg-white', !match);
+        b.classList.toggle('dark:bg-slate-800', !match);
+      });
+
+      drawMonteCarloPi();
+    }
+
+    function drawMonteCarloPi() {
+      const canvas = document.getElementById('mc-pi-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      ctx.clearRect(0, 0, w, h);
+      const pad = 12;
+      const size = Math.min(w, h) - pad * 2;
+      const ox = (w - size) / 2;
+      const oy = (h - size) / 2;
+
+      // Négyzet keret
+      ctx.strokeStyle = dark ? '#475569' : '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(ox, oy, size, size);
+
+      // Pontok
+      const r = lastMcPoints.length > 3000 ? 1.4 : 2.1;
+      for (let i = 0; i < lastMcPoints.length; i++) {
+        const p = lastMcPoints[i];
+        ctx.fillStyle = p.isIn ? 'rgba(13, 148, 136, 0.75)' : 'rgba(244, 63, 94, 0.7)';
+        ctx.beginPath();
+        ctx.arc(ox + p.x * size, oy + (1 - p.y) * size, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Negyedkör ív
+      ctx.strokeStyle = dark ? '#f8fafc' : '#0f172a';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(ox, oy + size, size, -Math.PI / 2, 0);
+      ctx.stroke();
+    }
+
+    // =========================================================================
+    // 5. INTERAKTÍV LOGISZTIKUS & PÓKHÁLÓDIAGRAM SZIMULÁTOR (2. MODUL)
+    // =========================================================================
+    function setLogisticPreset(r, x0) {
+      document.getElementById('log-r').value = r;
+      document.getElementById('log-x0').value = x0;
+      updateLogisticSim();
+    }
+
+    function updateLogisticSim() {
+      const r = parseFloat(document.getElementById('log-r').value);
+      const x0 = parseFloat(document.getElementById('log-x0').value);
+      document.getElementById('log-r-val').innerText = r.toFixed(2);
+      document.getElementById('log-x0-val').innerText = x0.toFixed(2);
+
+      // Fixpont és derivált info
+      const xStar = r > 1 ? (1 - 1 / r) : 0;
+      const deriv = r > 1 ? (2 - r) : r;
+      let regime = '';
+      let badgeCls = '';
+      if (r < 1) {
+        regime = 'Kihalás (x* = 0 stabil)';
+        badgeCls = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+      } else if (r < 3) {
+        regime = 'Stabil pozitív fixpont';
+        badgeCls = 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300';
+      } else if (r < 3.4495) {
+        regime = 'Stabil 2-es ciklus';
+        badgeCls = 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300';
+      } else if (r < 3.5699) {
+        regime = 'Perióduskettőződés (4, 8, 16...)';
+        badgeCls = 'bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300';
+      } else {
+        regime = 'Kaotikus régió (periodikus ablakokkal)';
+        badgeCls = 'bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-300';
+      }
+
+      document.getElementById('log-info').innerHTML = `
+        <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="text-slate-500 dark:text-slate-400">Fixpont x*:</span> <strong class="font-mono">${xStar.toFixed(4)}</strong>
+        </div>
+        <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="text-slate-500 dark:text-slate-400">Derivált f'(x*):</span> <strong class="font-mono">${deriv.toFixed(3)}</strong>
+        </div>
+        <div class="p-2.5 rounded-xl font-semibold text-center ${badgeCls}">
+          ${regime}
+        </div>
+      `;
+
+      // Iteráció
+      const N = 50;
+      const xs = [x0];
+      for (let i = 0; i < N; i++) {
+        const prev = xs[xs.length - 1];
+        xs.push(r * prev * (1 - prev));
+      }
+
+      drawCobweb(r, xs);
+      drawTimeSeries(xs);
+    }
+
+    function drawCobweb(r, xs) {
+      const canvas = document.getElementById('cobweb-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      ctx.clearRect(0, 0, w, h);
+      const pad = 28;
+      const size = Math.min(w, h) - pad * 1.5;
+      const ox = (w - size) / 2 + 6;
+      const oy = (h - size) / 2 - 4;
+      const toX = v => ox + v * size;
+      const toY = v => oy + (1 - v) * size;
+
+      // Tengelyek
+      ctx.strokeStyle = dark ? '#475569' : '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ox, oy, size, size);
+
+      // y = x átló
+      ctx.strokeStyle = dark ? '#64748b' : '#94a3b8';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(0));
+      ctx.lineTo(toX(1), toY(1));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Parabola f(x) = r*x*(1-x)
+      ctx.strokeStyle = dark ? '#38bdf8' : '#0284c7';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const x = i / 100;
+        const y = r * x * (1 - x);
+        if (i === 0) ctx.moveTo(toX(x), toY(y));
+        else ctx.lineTo(toX(x), toY(y));
+      }
+      ctx.stroke();
+
+      // Pókháló lépések
+      ctx.strokeStyle = dark ? 'rgba(244, 114, 182, 0.85)' : 'rgba(225, 29, 72, 0.8)';
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(toX(xs[0]), toY(0));
+      for (let i = 0; i < Math.min(xs.length - 1, 35); i++) {
+        ctx.lineTo(toX(xs[i]), toY(xs[i + 1]));
+        ctx.lineTo(toX(xs[i + 1]), toY(xs[i + 1]));
+      }
+      ctx.stroke();
+
+      // Kezdőpont
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(toX(xs[0]), toY(0), 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Feliratok
+      ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('0', ox, oy + size + 13);
+      ctx.fillText('1.0', ox + size, oy + size + 13);
+      ctx.fillText('xₙ', ox + size / 2, oy + size + 14);
+      ctx.textAlign = 'right';
+      ctx.fillText('1.0', ox - 5, oy + 4);
+    }
+
+    function drawTimeSeries(xs) {
+      const canvas = document.getElementById('timeseries-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      ctx.clearRect(0, 0, w, h);
+      const pad = { l: 32, r: 12, t: 14, b: 26 };
+      const pw = w - pad.l - pad.r;
+      const ph = h - pad.t - pad.b;
+
+      // Rács
+      ctx.strokeStyle = dark ? '#334155' : '#e2e8f0';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.t + (ph * i) / 4;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+        ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText((1 - i * 0.25).toFixed(2), pad.l - 5, y + 3);
+      }
+
+      // Vonal
+      ctx.strokeStyle = dark ? '#a78bfa' : '#7c3aed';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      xs.forEach((v, i) => {
+        const px = pad.l + (i / (xs.length - 1)) * pw;
+        const py = pad.t + (1 - v) * ph;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      // Pontok
+      ctx.fillStyle = dark ? '#c4b5fd' : '#6d28d9';
+      xs.forEach((v, i) => {
+        const px = pad.l + (i / (xs.length - 1)) * pw;
+        const py = pad.t + (1 - v) * ph;
+        ctx.beginPath();
+        ctx.arc(px, py, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Iteráció (n)', pad.l + pw / 2, h - 6);
+    }
+
+    document.getElementById('log-r').addEventListener('input', updateLogisticSim);
+    document.getElementById('log-x0').addEventListener('input', updateLogisticSim);
+
+    // =========================================================================
+    // 6. INTERAKTÍV FEIGENBAUM-DIAGRAM (2. MODUL)
+    // =========================================================================
+    let feigImageCache = null;
+    let feigCacheDark = null;
+    let feigCacheW = 0;
+
+    function drawFeigenbaum(hoverX = null) {
+      const canvas = document.getElementById('feigenbaum-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      const pad = { l: 36, r: 16, t: 16, b: 28 };
+      const pw = w - pad.l - pad.r;
+      const ph = h - pad.t - pad.b;
+      const rMin = 2.5, rMax = 4.0;
+
+      // Ha nincs cache vagy változott a méret/téma, számoljuk újra
+      if (!feigImageCache || feigCacheDark !== dark || Math.abs(feigCacheW - w) > 2) {
+        const off = document.createElement('canvas');
+        off.width = canvas.width;
+        off.height = canvas.height;
+        const octx = off.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Rács
+        octx.strokeStyle = dark ? '#334155' : '#e2e8f0';
+        octx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const y = pad.t + (ph * i) / 5;
+          octx.beginPath(); octx.moveTo(pad.l, y); octx.lineTo(w - pad.r, y); octx.stroke();
+          octx.fillStyle = dark ? '#94a3b8' : '#64748b';
+          octx.font = '10px Inter, sans-serif';
+          octx.textAlign = 'right';
+          octx.fillText((1 - i * 0.2).toFixed(1), pad.l - 6, y + 3);
+        }
+        [2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0].forEach(rv => {
+          const x = pad.l + ((rv - rMin) / (rMax - rMin)) * pw;
+          octx.fillStyle = dark ? '#94a3b8' : '#64748b';
+          octx.font = '10px Inter, sans-serif';
+          octx.textAlign = 'center';
+          octx.fillText(rv.toFixed(1), x, h - 10);
+        });
+
+        // Jelölő vonalak: r = 3.0 és r_inf = 3.5699
+        const x3 = pad.l + ((3.0 - rMin) / (rMax - rMin)) * pw;
+        octx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
+        octx.setLineDash([4, 4]);
+        octx.beginPath(); octx.moveTo(x3, pad.t); octx.lineTo(x3, pad.t + ph); octx.stroke();
+
+        const xInf = pad.l + ((3.56994567 - rMin) / (rMax - rMin)) * pw;
+        octx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
+        octx.beginPath(); octx.moveTo(xInf, pad.t); octx.lineTo(xInf, pad.t + ph); octx.stroke();
+        octx.setLineDash([]);
+
+        // Bifurkációs pontok
+        octx.fillStyle = dark ? 'rgba(129, 140, 248, 0.35)' : 'rgba(30, 64, 175, 0.28)';
+        const cols = Math.floor(pw);
+        for (let px = 0; px < cols; px++) {
+          const r = rMin + (px / cols) * (rMax - rMin);
+          let x = 0.2;
+          for (let n = 0; n < 300; n++) x = r * x * (1 - x);
+          for (let n = 0; n < 90; n++) {
+            x = r * x * (1 - x);
+            const py = pad.t + (1 - x) * ph;
+            octx.fillRect(pad.l + px, py, 1.1, 1.1);
+          }
+        }
+
+        feigImageCache = off;
+        feigCacheDark = dark;
+        feigCacheW = w;
+      }
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(feigImageCache, 0, 0, w, h);
+
+      // Szálkereszt egérmozgatásra
+      if (hoverX !== null && hoverX >= pad.l && hoverX <= w - pad.r) {
+        const rVal = rMin + ((hoverX - pad.l) / pw) * (rMax - rMin);
+        ctx.strokeStyle = dark ? '#38bdf8' : '#0f172a';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(hoverX, pad.t);
+        ctx.lineTo(hoverX, pad.t + ph);
+        ctx.stroke();
+
+        let desc = 'Stabil fixpont';
+        if (rVal >= 3.0 && rVal < 3.4495) desc = '2-es ciklus';
+        else if (rVal >= 3.4495 && rVal < 3.5441) desc = '4-es ciklus';
+        else if (rVal >= 3.5441 && rVal < 3.5699) desc = '8, 16, ... ciklus';
+        else if (rVal >= 3.828 && rVal <= 3.855) desc = '3-as periodikus ablak!';
+        else if (rVal >= 3.5699) desc = 'Kaotikus régió';
+
+        document.getElementById('feig-readout').innerText = `r = ${rVal.toFixed(4)} → ${desc}`;
+      }
+    }
+
+    const feigCanvas = document.getElementById('feigenbaum-canvas');
+    function handleFeigMove(clientX) {
+      const rect = feigCanvas.getBoundingClientRect();
+      drawFeigenbaum(clientX - rect.left);
+    }
+    feigCanvas.addEventListener('mousemove', e => handleFeigMove(e.clientX));
+    feigCanvas.addEventListener('mouseleave', () => drawFeigenbaum(null));
+    feigCanvas.addEventListener('touchmove', e => {
+      if (e.touches.length) handleFeigMove(e.touches[0].clientX);
+    }, { passive: true });
+
+    // =========================================================================
+    // 7. INTERAKTÍV WEBSHOP MARKOV-LÁNC SZIMULÁTOR (3. MODUL)
+    // =========================================================================
+    const SHOP_STATES = ['K', 'T', 'M', 'R', 'V'];
+    const SHOP_NAMES = ['Kezdőlap', 'Keresés', 'Megtekintés', 'Kosár', 'Vásárlás'];
+    const SHOP_P = [
+      [0.30, 0.35, 0.20, 0.10, 0.05],
+      [0.15, 0.40, 0.30, 0.10, 0.05],
+      [0.10, 0.20, 0.50, 0.15, 0.05],
+      [0.05, 0.10, 0.20, 0.50, 0.15],
+      [0.40, 0.10, 0.10, 0.10, 0.30]
+    ];
+
+    function vecMatMul(vec, mat) {
+      const out = new Array(mat[0].length).fill(0);
+      for (let j = 0; j < mat[0].length; j++) {
+        let s = 0;
+        for (let i = 0; i < vec.length; i++) s += vec[i] * mat[i][j];
+        out[j] = s;
+      }
+      return out;
+    }
+
+    // Stacionárius eloszlás (pontos numerikus limit)
+    let SHOP_STAT = [1, 0, 0, 0, 0];
+    for (let k = 0; k < 200; k++) SHOP_STAT = vecMatMul(SHOP_STAT, SHOP_P);
+
+    function sampleNextState(curr) {
+      const u = Math.random();
+      const row = SHOP_P[curr];
+      let cum = 0;
+      for (let j = 0; j < row.length; j++) {
+        cum += row[j];
+        if (u <= cum) return j;
+      }
+      return row.length - 1;
+    }
+
+    let lastMarkovData = null;
+
+    function runMarkovSimulation() {
+      const start = parseInt(document.getElementById('mk-start').value);
+      const T = parseInt(document.getElementById('mk-t').value);
+      const N = parseInt(document.getElementById('mk-n').value);
+      document.getElementById('mk-t-val').innerText = T;
+
+      // Analitikus: pi^(0) * P^T
+      let theory = [0, 0, 0, 0, 0];
+      theory[start] = 1;
+      for (let t = 0; t < T; t++) theory = vecMatMul(theory, SHOP_P);
+
+      // Monte Carlo
+      const counts = [0, 0, 0, 0, 0];
+      for (let i = 0; i < N; i++) {
+        let s = start;
+        for (let t = 0; t < T; t++) s = sampleNextState(s);
+        counts[s]++;
+      }
+      const sim = counts.map(c => c / N);
+
+      let maxErr = 0;
+      for (let i = 0; i < 5; i++) maxErr = Math.max(maxErr, Math.abs(sim[i] - theory[i]));
+      document.getElementById('mk-max-err').innerHTML = `Max. eltérés (MC vs. Elmélet): <strong class="text-rose-600 dark:text-rose-400">${maxErr.toFixed(4)}</strong>`;
+
+      lastMarkovData = { theory, sim, stat: SHOP_STAT };
+      drawMarkovChart();
+    }
+
+    function drawMarkovChart() {
+      if (!lastMarkovData) return;
+      const canvas = document.getElementById('markov-canvas');
+      const setup = setupHiDPICanvas(canvas);
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+      const dark = isDark();
+
+      ctx.clearRect(0, 0, w, h);
+      const pad = { l: 38, r: 16, t: 20, b: 36 };
+      const pw = w - pad.l - pad.r;
+      const ph = h - pad.t - pad.b;
+      const yMax = Math.max(0.5, ...lastMarkovData.theory, ...lastMarkovData.sim) * 1.1;
+
+      // Y tengely és rács
+      ctx.strokeStyle = dark ? '#334155' : '#e2e8f0';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.t + (ph * i) / 4;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+        ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(((yMax * (4 - i)) / 4).toFixed(2), pad.l - 6, y + 3);
+      }
+
+      const groupW = pw / 5;
+      const barW = Math.min(24, groupW * 0.24);
+      const colors = ['#3b82f6', '#f59e0b', '#10b981'];
+      const series = [lastMarkovData.theory, lastMarkovData.sim, lastMarkovData.stat];
+
+      for (let i = 0; i < 5; i++) {
+        const cx = pad.l + groupW * i + groupW / 2;
+        series.forEach((arr, sIdx) => {
+          const val = arr[i];
+          const bh = (val / yMax) * ph;
+          const bx = cx + (sIdx - 1.5) * (barW + 2);
+          const by = pad.t + ph - bh;
+          ctx.fillStyle = colors[sIdx];
+          ctx.beginPath();
+          ctx.roundRect ? ctx.roundRect(bx, by, barW, bh, [4, 4, 0, 0]) : ctx.rect(bx, by, barW, bh);
+          ctx.fill();
+
+          // Érték kiírása a 2 fő oszlop fölé ha elfér
+          if (sIdx < 2 && pw > 320) {
+            ctx.fillStyle = dark ? '#cbd5e1' : '#334155';
+            ctx.font = '9px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(val.toFixed(2), bx + barW / 2, by - 4);
+          }
+        });
+
+        ctx.fillStyle = dark ? '#e2e8f0' : '#1e293b';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(SHOP_STATES[i], cx, h - 16);
+        ctx.fillStyle = dark ? '#94a3b8' : '#64748b';
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillText(SHOP_NAMES[i], cx, h - 4);
+      }
+    }
+
+    let pathTimer = null;
+    function playSingleMarkovPath() {
+      if (pathTimer) clearInterval(pathTimer);
+      const box = document.getElementById('mk-path-box');
+      const container = document.getElementById('mk-path-steps');
+      box.classList.remove('hidden');
+      container.innerHTML = '';
+
+      let s = parseInt(document.getElementById('mk-start').value);
+      const path = [s];
+      for (let t = 0; t < 15; t++) {
+        s = sampleNextState(s);
+        path.push(s);
+      }
+
+      const badgeColors = [
+        'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
+        'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200',
+        'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
+        'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
+        'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200'
+      ];
+
+      let idx = 0;
+      pathTimer = setInterval(() => {
+        if (idx >= path.length) { clearInterval(pathTimer); return; }
+        const st = path[idx];
+        const span = document.createElement('span');
+        span.className = `px-2.5 py-1 rounded-lg font-bold ${badgeColors[st]}`;
+        span.innerText = `${idx}. ${SHOP_STATES[st]}`;
+        container.appendChild(span);
+        if (idx < path.length - 1) {
+          const arrow = document.createElement('span');
+          arrow.className = 'text-slate-400';
+          arrow.innerText = '→';
+          container.appendChild(arrow);
+        }
+        idx++;
+      }, 120);
+    }
+
+    document.getElementById('mk-t').addEventListener('input', runMarkovSimulation);
+    document.getElementById('mk-start').addEventListener('change', runMarkovSimulation);
+    document.getElementById('mk-n').addEventListener('change', runMarkovSimulation);
+
+    // =========================================================================
+    // 8. ÖNELLENŐRZŐ KÉRDÉSEK (ACCORDION) & 12 KÉRDÉSES VIZSGAKVÍZ (5. FÜL)
+    // =========================================================================
+    const studyQuestions = [
+      // 1. modul
+      { mod: '1. Modul', q: 'Miért hasznos a seed?', a: 'A seed (kezdőmag) inicializálja a pszeudovéletlen-generátor (PRNG) belső állapotát. Azonos seed, algoritmus és környezet esetén pontosan ugyanaz a számsorozat jön létre, így a szimulációs kísérletek reprodukálhatók, hibakereshetők és tudományosan ellenőrizhetők.' },
+      { mod: '1. Modul', q: 'Hogyan működik az LCG (lineáris kongruens generátor)?', a: 'Egyszerű egész aritmetikai rekurzióval állítja elő a következő állapotot: $x_{n+1} = (a \\cdot x_n + c) \\bmod m$. A paraméterek ($a, c, m$) megválasztása határozza meg a periódushosszt (amely legfeljebb $m$ lehet).' },
+      { mod: '1. Modul', q: 'Miért használható a negyedkör a $\\pi$ becslésére?', a: 'Az $[0,1]\\times[0,1]$ egységnégyzet területe $1$, az egységsugarú negyedkör területe $\\pi/4$. Egyenletesen szórt pontok esetén a negyedkörbe esés valószínűsége $P(X^2+Y^2 \\le 1) = \\pi/4$, így a belső pontok arányát 4-gyel szorozva megkapjuk $\\pi$ becslését.' },
+      { mod: '1. Modul', q: 'Hogyan változik a Monte Carlo-hiba $N$ növelésével?', a: 'A standard hiba nagyságrendje $\\propto 1/\\sqrt{N}$. Ez azt jelenti, hogy a becslés pontosságának tízszerezéséhez körülbelül százszoros mintaszám ($100\\times N$) szükséges.' },
+      // 2. modul
+      { mod: '2. Modul', q: 'Mi a különbség a fixpont és a 2-es periódusú pálya között?', a: 'Fixpontban ($f(x^*)=x^*$) a rendszer állapota egyáltalán nem változik a következő lépésekben. A 2-es periódusú pályán viszont két különböző érték ($a \\ne b$) között váltakozik periodikusan: $a \\to b \\to a \\to b \\dots$' },
+      { mod: '2. Modul', q: 'Miért éppen az $f(f(x)) = x$ egyenletet oldjuk meg a 2-es ciklushoz?', a: 'Mert a 2-es ciklus pontjai két iterációs lépés után térnek vissza önmagukba ($f^2(x)=x$). Az egyenlet gyökei között a fixpontok is benne vannak, ezért azokat kizárva kapjuk meg a valódi 2-es ciklus pontjait.' },
+      { mod: '2. Modul', q: 'Miért jelzi a $-1$ derivált a perióduskettőzés határát?', a: 'A kis eltérés a fixponttól $\\epsilon_{n+1} \\approx f\'(x^*)\\epsilon_n$ szerint alakul. Ha $f\'(x^*)$ negatív, az eltérés minden lépésben előjelet vált (oszcillál); amikor átlépi a $-1$-et ($|f\'(x^*)| > 1$), az oszcilláció nem csillapodik többé, hanem felerősödve stabil 2-es ciklusba áll be.' },
+      { mod: '2. Modul', q: 'Miért hagyjuk el a kezdeti (tranziens) iterációkat a Feigenbaum-diagramnál?', a: 'A diagram a rendszer hosszú távú (aszimptotikus) viselkedését – a fixpontot, ciklust vagy kaotikus attraktort – mutatja. A kezdeti lépések még a kiindulási ponttól ($x_0$) függő átmeneti (tranziens) szakaszhoz tartoznak, amelyek elmosnák az ábrát.' },
+      { mod: '2. Modul', q: 'Miért nem azonos a káosz a véletlennel?', a: 'A kaotikus rendszer (pl. logisztikus leképezés $r=3{,}8$-nál) teljesen determinisztikus képlettel működik, nincs benne véletlen zaj. Kiszámíthatatlansága a kezdeti feltételekre való extrém érzékenységből ered.' },
+      // 3. modul
+      { mod: '3. Modul', q: 'Miért kell a $P$ átmeneti mátrix minden sorának 1-re összegződnie?', a: 'Mert egy adott $i$ állapotból a következő lépésben a rendszer biztosan (100% = 1 valószínűséggel) átlép az állapottér valamelyik $j$ állapotába (beleértve a helyben maradást is).' },
+      { mod: '3. Modul', q: 'Mit jelent a $P^k$ mátrix $(i, j)$ eleme?', a: 'Azt a feltételes valószínűséget adja meg, hogy a rendszer az $i$-edik állapotból indulva pontosan $k$ lépés elteltével a $j$-edik állapotban lesz.' },
+      { mod: '3. Modul', q: 'Miért tér el a Monte Carlo becslés a pontos elméleti valószínűségtől?', a: 'Mert véges számú ($N$) véletlen szimulált pályából számolunk empirikus relatív gyakoriságot, ami statisztikai mintavételi ingadozással (hibarend $\\propto 1/\\sqrt{N}$) terhelt. $N$ növelésével az eltérés csökken.' },
+      { mod: '3. Modul', q: 'Miért nem jelent a stacionárius eloszlás állandó állapotot?', a: 'A stacionárius eloszlás ($\\pi^* = \\pi^* P$) azt jelenti, hogy az állapotok valószínűségi eloszlása (a populáció arányai) állandósulnak az időben, miközben az egyes egyedek folyamatosan mozognak az állapotok között.' }
+    ];
+
+    const accContainer = document.getElementById('accordion-container');
+    studyQuestions.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden';
+      div.innerHTML = `
+        <button onclick="toggleAccordion(${idx})" class="w-full text-left px-4 py-3.5 bg-slate-50 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between gap-3 transition">
+          <div class="flex items-center gap-2.5">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 shrink-0">${item.mod}</span>
+            <span class="font-semibold text-sm text-slate-900 dark:text-white">${item.q}</span>
+          </div>
+          <svg id="acc-icon-${idx}" class="w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="acc-body-${idx}" class="hidden px-4 py-3.5 bg-white dark:bg-slate-900 text-sm text-slate-600 dark:text-slate-300 border-t border-slate-200 dark:border-slate-800 leading-relaxed">
+          ${item.a}
+        </div>
+      `;
+      accContainer.appendChild(div);
+    });
+
+    function toggleAccordion(idx) {
+      const body = document.getElementById('acc-body-' + idx);
+      const icon = document.getElementById('acc-icon-' + idx);
+      const isHidden = body.classList.toggle('hidden');
+      icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+      if (!isHidden) renderAllMath(body);
+    }
+
+    // 12 kérdéses vizsgakvíz
+    const quizData = [
+      {
+        mod: '1. Modul',
+        q: 'Melyik állítás igaz a PRNG-re (pszeudovéletlen generátorra)?',
+        options: [
+          'Fizikai zajon alapul, ezért soha nem reprodukálható.',
+          'Determinisztikus algoritmus, azonos seed esetén azonos számsorozatot ad.',
+          'Mindig biztonságos kriptográfiai kulcsgenerálásra.',
+          'Periódusa mindig végtelen.'
+        ],
+        correct: 1,
+        exp: 'A PRNG determinisztikus algoritmus, ezért szimulációkhoz ideális: azonos seeddel megismételhető.'
+      },
+      {
+        mod: '1. Modul',
+        q: 'Az $x_{n+1} = (5x_n + 3) \\bmod 16$ LCG esetén, ha $x_0 = 7$, mennyi $x_1$?',
+        options: ['1', '6', '8', '14'],
+        correct: 1,
+        exp: '$(5 \\cdot 7 + 3) \\bmod 16 = 38 \\bmod 16 = 6$.'
+      },
+      {
+        mod: '1. Modul',
+        q: 'Hányszorosára kell növelni a mintaszámot ($N$), ha 10-szer pontosabb Monte Carlo-becslést szeretnénk?',
+        options: ['10-szeresére', '20-szorosára', '100-szorosára', '1000-szeresére'],
+        correct: 2,
+        exp: 'Mivel a standard hiba $\\propto 1/\\sqrt{N}$, a tízszeres pontossághoz $10^2 = 100$-szoros mintaszám szükséges.'
+      },
+      {
+        mod: '1. Modul',
+        q: 'Melyik képlet állít elő $\\lambda$ rátájú exponenciális eloszlást $U \\sim \\text{Uniform}(0,1)$-ből?',
+        options: ['$T = -\\ln(1-U)/\\lambda$', '$T = \\lambda \\cdot e^{-U}$', '$T = U^2 / \\lambda$', '$T = 1 - e^{-\\lambda U}$'],
+        correct: 0,
+        exp: 'Az $F(t) = 1 - e^{-\\lambda t} = U$ egyenletet $t$-re rendezve kapjuk az inverz transzformáció képletét: $T = -\\ln(1-U)/\\lambda$.'
+      },
+      {
+        mod: '2. Modul',
+        q: 'A diszkrét logisztikus modellben ($x_{n+1} = rx_n(1-x_n)$) mely $r$ tartományban stabil a pozitív fixpont ($x_2^* = 1 - 1/r$)?',
+        options: ['$0 < r < 1$', '$1 < r < 3$', '$3 < r < 3{,}57$', '$r > 4$'],
+        correct: 1,
+        exp: 'Mivel $f\'(1-1/r) = 2-r$, a $|2-r| < 1$ stabilitási feltétel pontosan az $1 < r < 3$ intervallumon teljesül.'
+      },
+      {
+        mod: '2. Modul',
+        q: 'Mikor lokálisan aszimptotikusan stabil (vonzó) egy $x^*$ fixpont?',
+        options: ['Ha $|f\'(x^*)| > 1$', 'Ha $|f\'(x^*)| < 1$', 'Ha $f\'(x^*) = 0$ kizárólag', 'Ha $f(x^*) = 0$'],
+        correct: 1,
+        exp: 'Mivel $\\epsilon_{n+1} \\approx f\'(x^*)\\epsilon_n$, a kis eltérés akkor zsugorodik nullához, ha $|f\'(x^*)| < 1$.'
+      },
+      {
+        mod: '2. Modul',
+        q: 'Mi történik a logisztikus modellben az $r = 3$ paraméterértéknél?',
+        options: ['A populáció kihal.', 'Megjelenik az első perióduskettőződés (1-esből 2-es ciklus).', 'Elindul a teljes káosz ($r_\\infty$).', 'A rendszer elhagyja a $[0,1]$ intervallumot.'],
+        correct: 1,
+        exp: '$r=3$-nál $f\'(x_2^*) = -1$, a pozitív fixpont instabillá válik és stabil 2-es ciklus alakul ki.'
+      },
+      {
+        mod: '2. Modul',
+        q: 'Mekkora megközelítőleg a Feigenbaum-állandó ($\\delta$)?',
+        options: ['$3{,}1416$', '$2{,}7183$', '$3{,}5699$', '$4{,}6692$'],
+        correct: 3,
+        exp: 'A Feigenbaum-állandó $\\delta \\approx 4{,}669201609$, míg $r_\\infty \\approx 3{,}5699$ a káosz felhalmozódási pontja.'
+      },
+      {
+        mod: '3. Modul',
+        q: 'Mi a Markov-tulajdonság lényege?',
+        options: [
+          'Minden állapotból csak a következőbe lehet lépni.',
+          'A következő állapot eloszlása csak az aktuális állapottól függ, a múltbeli útvonaltól nem.',
+          'Az átmeneti mátrix mindig szimmetrikus.',
+          'A rendszer minden lépésben ugyanabban az állapotban marad.'
+        ],
+        correct: 1,
+        exp: 'A Markov-lánc „emlékezetmentes”: a jövő a jelen ismeretében független a múlttól.'
+      },
+      {
+        mod: '3. Modul',
+        q: 'Hogyan számoljuk ki az állapoteloszlást $k$ lépés után a $\\pi^{(0)}$ kezdeti vektorból?',
+        options: ['$\\pi^{(0)} + kP$', '$\\pi^{(0)} P^k$', '$k \\cdot \\pi^{(0)} P$', '$P^k / \\pi^{(0)}$'],
+        correct: 1,
+        exp: 'Minden lépés egy $P$-vel való jobbról szorzás, így $k$ lépés után $\\pi^{(k)} = \\pi^{(0)} P^k$.'
+      },
+      {
+        mod: '3. Modul',
+        q: 'A webáruház 5 állapotú modelljében hosszú távon melyik állapotban töltik a látogatók a legtöbb időt?',
+        options: ['K – Kezdőlap (16,3%)', 'T – Termékkeresés (24,5%)', 'M – Termékmegtekintés (30,8%)', 'V – Vásárlás lezárása (9,2%)'],
+        correct: 2,
+        exp: 'A stacionárius eloszlásban $M$ értéke a legnagyobb ($\\approx 0{,}308$, azaz 30,8%).'
+      },
+      {
+        mod: '3. Modul',
+        q: 'Melyik NumPy utasítás ellenőrzi helyesen, hogy a $P$ mátrix minden sorának összege 1?',
+        options: [
+          'assert np.allclose(P.sum(axis=0), 1)',
+          'assert np.allclose(P.sum(axis=1), 1)',
+          'assert P.mean() == 1',
+          'assert np.linalg.det(P) == 1'
+        ],
+        correct: 1,
+        exp: 'NumPy-ban az `axis=1` adja meg a soronkénti összegeket (az `axis=0` az oszlopösszegeket adná).'
+      }
+    ];
+
+    let quizScore = 0;
+    let answeredSet = new Set();
+
+    function buildQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizScore = 0;
+      answeredSet.clear();
+      document.getElementById('quiz-score').innerText = '0';
+
+      quizData.forEach((qObj, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-3';
+        card.innerHTML = `
+          <div class="flex items-start gap-2.5">
+            <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0">${qIdx + 1}.</span>
+            <div>
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">${qObj.mod}</span>
+              <div class="font-semibold text-slate-900 dark:text-white text-sm sm:text-base mt-0.5">${qObj.q}</div>
+            </div>
+          </div>
+          <div id="quiz-opts-${qIdx}" class="grid sm:grid-cols-2 gap-2.5">
+            ${qObj.options.map((opt, oIdx) => `
+              <button onclick="answerQuiz(${qIdx}, ${oIdx}, this)" class="quiz-opt text-left px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-brand-500 text-sm transition">
+                <span class="font-mono font-bold text-slate-400 mr-1.5">${String.fromCharCode(65 + oIdx)}.</span> ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div id="quiz-exp-${qIdx}" class="hidden text-xs sm:text-sm p-3 rounded-xl"></div>
+        `;
+        container.appendChild(card);
+      });
+      renderAllMath(container);
+    }
+
+    function answerQuiz(qIdx, oIdx, btn) {
+      if (answeredSet.has(qIdx)) return;
+      answeredSet.add(qIdx);
+
+      const qObj = quizData[qIdx];
+      const optsDiv = document.getElementById('quiz-opts-' + qIdx);
+      const buttons = optsDiv.querySelectorAll('button');
+      const expDiv = document.getElementById('quiz-exp-' + qIdx);
+
+      buttons.forEach((b, idx) => {
+        b.disabled = true;
+        b.classList.remove('hover:border-brand-500');
+        if (idx === qObj.correct) {
+          b.classList.add('bg-emerald-50', 'dark:bg-emerald-950/50', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-200', 'font-semibold');
+        } else if (idx === oIdx) {
+          b.classList.add('bg-rose-50', 'dark:bg-rose-950/50', 'border-rose-500', 'text-rose-800', 'dark:text-rose-200');
+        } else {
+          b.classList.add('opacity-60');
+        }
+      });
+
+      const isRight = oIdx === qObj.correct;
+      if (isRight) {
+        quizScore++;
+        document.getElementById('quiz-score').innerText = quizScore;
+        expDiv.className = 'text-xs sm:text-sm p-3 rounded-xl bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200';
+        expDiv.innerHTML = `<strong>Helyes!</strong> ${qObj.exp}`;
+      } else {
+        expDiv.className = 'text-xs sm:text-sm p-3 rounded-xl bg-rose-100/70 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200';
+        expDiv.innerHTML = `<strong>Nem egészen.</strong> ${qObj.exp}`;
+      }
+      renderAllMath(expDiv);
+    }
+
+    function resetQuiz() {
+      buildQuiz();
+    }
+
+    // =========================================================================
+    // 9. INICIALIZÁLÁS ÉS ÁTMÉRETEZÉS KEZELÉS
+    // =========================================================================
+    function redrawActiveTabCanvases() {
+      if (activeTab === 'mod1') {
+        updateLCG();
+        drawMonteCarloPi();
+      } else if (activeTab === 'mod2') {
+        updateLogisticSim();
+        feigImageCache = null;
+        drawFeigenbaum();
+      } else if (activeTab === 'mod3') {
+        drawMarkovChart();
+      }
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(redrawActiveTabCanvases, 120);
+    });
+
+    window.addEventListener('load', () => {
+      updateLCG();
+      runMonteCarloPi(1000);
+      updateLogisticSim();
+      runMarkovSimulation();
+      buildQuiz();
+      renderAllMath(document.body);
+    });
+  </script>
+</body>
+</html>
